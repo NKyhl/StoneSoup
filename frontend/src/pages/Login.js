@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import StoneSoupIcon from "../StoneSoupIcon.png"
 import { Link } from 'react-router-dom';
+import "./login.css"
 
 function Login() {
 
