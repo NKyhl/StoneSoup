@@ -47,7 +47,7 @@ function Profile(){
                 <h3>Info</h3>   
                 <hr></hr>
             </div>
-            <div className="profile-attribute">
+            <div className="profile-attribute profile">
                 <label htmlFor="name">Name</label>
                 <input disabled={!edit} type="text" id="name" placeholder="Username" style={{ border: edit ? '1px solid black' : 'None' }}></input>
                 <label htmlFor="email">Email</label>
@@ -57,7 +57,7 @@ function Profile(){
                 <h3>Goals</h3>      
                 <hr></hr>
             </div>
-            <div className="profile-attribute">
+            <div className="profile-attribute profile">
                 <label htmlFor="cals">Calories</label>
                 <input disabled={!edit} type="text" id="cals" placeholder="Calores" style={{ border: edit ? '1px solid black' : 'None' }}></input>
                 <label htmlFor="carbs">Carbs</label>

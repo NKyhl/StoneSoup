@@ -1,0 +1,81 @@
+.week-calendar {
+    text-align: center;
+    padding: 10px 30px;
+  }
+  
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+  }
+  
+  .day {
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .day-name {
+    font-weight: bold;
+  }
+
+  .meals {
+    height: 400px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+  }
+  
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  button:focus {
+    outline: none;
+  }
+  
+.week-buttons {
+  background-color: initial;
+  background-image  : linear-gradient(-180deg, #fb923c, #ea580c   );
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Inter,-apple-system,system-ui,Roboto,"Helvetica Neue",Arial,sans-serif;
+  height: 40px;
+  line-height: 40px;
+  outline: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  pointer-events: auto;
+  position: relative;
+  text-align: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  vertical-align: top;
+  white-space: nowrap;
+  z-index: 0;
+  border: 0;
+  transition: box-shadow .2s;
+}
+
+.week-buttons:hover {
+    background-image: linear-gradient(-180deg, #f06937, #cc581a);   
+    box-shadow: rgba(0, 0, 0, 0.2) 0 4px 8px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .week-buttons:active {
+    background-image: linear-gradient(-180deg, #ea580c, #ea580c);
+    box-shadow: rgba(0, 0, 0, 0.3) 0 2px 4px;
+  }

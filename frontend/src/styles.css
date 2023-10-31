@@ -192,6 +192,25 @@ body {
     justify-content: space-between;
 }
 
+
+.profile label{
+    display: block;
+    margin-top: 30px;
+    font-size: 16px;
+    font-weight: 500;
+}
+.profile input{
+    display: block;
+    height: 50px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    padding: 0 10px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 300;
+}
+
 .profile-attribute {
     width: 100%;
     padding: 0 20px;
@@ -288,7 +307,25 @@ body {
     transform: scale(1.2); /* Increase size by 20% when selected */
 }
 
-.search-container {
-    width: 100%;
-    height: 500px;
-}
+
+.filter {
+    display: flex;
+    align-items: center;
+    width: 260px;
+    margin-bottom: 5px;
+  }
+
+  
+  .filter label {
+    font-weight: bold;
+    width: 100px;
+    margin: 0;
+  }
+  
+  .filter input {
+    margin: 0 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width:76px;
+  }
