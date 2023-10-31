@@ -79,12 +79,81 @@ def logout():
 @app.route("/api/search/name")
 def search_name():
     '''Search for Recipes by Name.'''
-    pass
+     if not (conn := mysql.connection):
+        return {'message': 'The database is not available'}, 400
+
+    name = request.json.get("search_name_string")
+
+    words = name.split()
+
+
+    querylist = []
+    wherelist = []
+    x=0
+    args = ()
+    if len(words) > 1:
+        for word in words:
+            leta = chr(ord('a') + x)
+            querylist.append(f"(SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")){leta}")
+            x=x+1
+            args = args + (word,)
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.name = {letb}.name ")
+
+        query = "SELECT a.name FROM "+", ".join(querylist)+" WHERE"
+        where = " AND ".join(wherelist)
+        query = query + where
+    else:
+        args = (words[0])
+        query = "SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
+
+    cursor = conn.cursor()
+    cursor.execute((query), (args))
+    recipes = cursor.fetchall()
+
+        
 
 @app.route("/api/search/ingredient")
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
-    pass
+    name = request.json("search_ingredient_string")
+
+    words = name.split()
+
+    querylist = []
+    wherelist = []
+    x = 0
+    args = ()
+
+    if len(words) > 1:
+        for word in words:
+            leta = chr(ord('a') + x)
+            query = ("SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%s( |$)\")")
+            query = "("+query+") ing"
+            query = ("(SELECT recipe_id FROM "+query+f", MadeWith m WHERE m.ingredient_id = ing.id) {leta}")
+            querylist.append(query)
+            x=x+1
+            args = args + (word,)
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
+        where = " AND ".join(wherelist)
+        query = ",".join(querylist)
+        query = "(SELECT a.recipe_id FROM " + query + " WHERE " +where +") id"
+
+    else:
+        query = (f"SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%( |$)\")")
+        query = "("+query+") ing"
+        query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
+    query = "SELECT name FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id"
+
+    cursor = conn.cursor()
+    cursor.execute((query), (args))
+    recipes = cursor.fetchall()
+
 
 if __name__ == '__main__':
     app.run(host='db8.cse.nd.edu', port=5000)
