@@ -12,9 +12,9 @@ function Header() {
             </div>
             <nav className="header-navigation">
                 <Link to="/">Home</Link>
-                <Link to="/User">User</Link>
-                <Link to="/Login">Sign In</Link>
-                <Link to="/signUp">Sign Up</Link>
+                <Link to="/user">User</Link>
+                <Link to="/login">Sign In</Link>
+                <Link to="/signup">Sign Up</Link>
                 <button>Menu</button>
             </nav>
         </div>
