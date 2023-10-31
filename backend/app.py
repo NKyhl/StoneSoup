@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend/build", static_url_path="/")
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'nkyhl'
 app.config['MYSQL_PASSWORD'] = 'goirish'
@@ -12,7 +12,19 @@ bcrypt = Bcrypt(app)
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return app.send_static_file('index.html')
+
+@app.route("/login")
+def login():
+    return app.send_static_file('index.html')
+
+@app.route("/signup")
+def signup():
+    return app.send_static_file('index.html')
+
+@app.route("/user")
+def user():
+    return app.send_static_file('index.html')
 
 @app.route("/api/test-connection")
 def test_connection():
@@ -46,7 +58,7 @@ def validate_username(username=''):
 
     validated = cursor.fetchall()
     cursor.close()
-    return {'valid': bool(validated)}
+    return {'exists': bool(validated)}
 
 @app.route("/api/validate/user", methods=['POST'])
 def validate_user():
@@ -87,7 +99,7 @@ def validate_user():
     return {'valid': bcrypt.check_password_hash(hashed_password, password)}
 
 @app.route("/api/signup", methods=['POST'])
-def signup():
+def api_signup():
     if not request.json:
         return {'message': 'application/json format required'}, 400
     
