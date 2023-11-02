@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./search.css"
 import SearchIcon from '@mui/icons-material/Search';
 import Recipes from "./Recipes";
@@ -20,6 +20,13 @@ function Search(){
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
+    // useEffect(() => {
+    //     const recipesPerPage = 10;
+    //     const indexOfLastRecipe = currentPage * recipesPerPage;
+    //     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+    //     const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+
+    // }, [recipes]);
     const recipesPerPage = 10;
     const indexOfLastRecipe = currentPage * recipesPerPage;
     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
@@ -58,7 +65,8 @@ function Search(){
         }
 
         const res_json = await res.json();
-        setRecipes(res_json.results);
+        console.log(res_json.recipes);
+        setRecipes(res_json.recipes);
         setLoading(false);
     }
 
