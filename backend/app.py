@@ -278,36 +278,56 @@ def update_user_goals():
 
     return {'message': 'User information updated'}, 200
 
-@app.route("/api/search/name")
+@app.route("/api/search/name", methods=['GET', 'POST'])
 def search_name():
     '''Search for Recipes by Name.'''
+
+    if not request.json or 'search' not in request.json:
+        return {'message': 'application/json format required'}, 400
+
     conn = mysql.connection
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-    name = request.json.get("searchValue")
+
+    name = request.json.get("search")
+
+    #cursor = conn.cursor()
+    #cursor.execute("SELECT * FROM Recipe WHERE name like '%%s%' LIMIT 10")
+    #res = cursor.fetchall()
+    #print(res)
+    #return "done"
 
     words = name.split()
     mincal = request.json.get("minCal")
+    mincal = str(mincal)
     maxcal = request.json.get("maxCal")
+    maxcal = str(maxcal)
     mincarb = request.json.get("minCarb")
+    mincarb = str(mincarb)
     maxcarb = request.json.get("maxCarb")
+    maxcarb = str(maxcarb)
     minfat = request.json.get("minFat")
+    minfat = str(minfat)
     maxfat = request.json.get("maxFat")
+    maxfat = str(maxfat)
     minpro = request.json.get("minProtein")
+    minpro = str(minpro)
     maxpro = request.json.get("maxProtein")
+    maxpro = str(maxpro)
 
 
     querylist = []
     wherelist = []
     x=0
-    args = ()
+    args = []
     if len(words) > 1:
         for word in words:
+            word = "%"+words+"%"
             leta = chr(ord('a') + x)
-            querylist.append(f"(SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")){leta}")
+            querylist.append(f"(SELECT name FROM Recipe WHERE name LIKE '%s'){leta}")
             x=x+1
-            args = args + (word,)
+            args.append(word)
         for i in range(1,x):
             leta = chr(ord('a') + i-1)
             letb = chr(ord('a') + i)
@@ -317,47 +337,55 @@ def search_name():
         where = " AND ".join(wherelist)
         query = query + where
     else:
-        args = (words[0])
-        query = "SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
+        args.append(words[0])
+        query = "SELECT * FROM Recipe WHERE name LIKE '%s' "
     if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
-        where = ""
+        where = []
         query = "SELECT * FROM (" +query+ ")rec WHERE "
         if mincal:
             where.append("calories > %s")
-            args = args + (mincal,)
+            args.append(mincal)
         if maxcal:
             where.append("calories < %s")
-            args = args + (maxcal,)
+            args.append(maxcal)
         if mincarb:
             where.append("carbs > %s")
-            args = args + (mincarb,)
+            args.append(mincarb)
         if maxcarb:
             where.append("carbs < %s")
-            args = args + (maxcarb,)
+            args.append(maxcarb)
         if maxfat:
             where.append("fat < %s")
-            args = args + (maxfat,)
+            args.append(maxfat)
         if minfat:
             where.append("fat > %s")
-            args = args + (minfat,)
+            args.append(minfat)
         if minpro:
             where.append("protein > %s")
-            args = args + (minpro,)
+            args.append(minpro)
         if maxpro:
             where.append("protein < %s")
-            args = args + (maxpro,)
-    W = " AND ".join(where)
-    query = query + W +";"       
+            args.append(maxpro)
+        W = " AND ".join(where)
+        query = query + W +";"       
     
-
-
-    cursor = conn.cursor()
-    cursor.execute((query), (args))
-    recipes = cursor.fetchall()
-
+    print(query%tuple(args))
+    curs = conn.cursor()
+    curs.execute(query, tuple(args))
+    recs = curs.fetchall()
+    curs.close()
+    print(recs)
+    results = []
+    for recipe in recs:
+        recipecols = {}
+        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
+        results.append(recipecols)
+    r = {'results':results}
+    print(r)
+    return r
         
 
-@app.route("/api/search/ingredient")
+@app.route("/api/search/ingredient", methods=['POST'])
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
     conn = mysql.connection
@@ -399,13 +427,7 @@ def search_ingredient():
     cursor = conn.cursor()
     cursor.execute((query), (args))
     recipes = cursor.fetchall()
-    results = []
-    for recipe in recipes:
-        recipecols = {}
-        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
-        results.append(recipecols)
-    r = {'results':results}
-    return r
+    return "hgfsdj"
             
 
 
