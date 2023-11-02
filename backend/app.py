@@ -116,6 +116,37 @@ def search_name():
     else:
         args = (words[0])
         query = "SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
+    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
+        where = ""
+        query = "SELECT * FROM (" +query+ ")rec WHERE "
+        if mincal:
+            where.append("calories > %s")
+            args = args + (mincal,)
+        if maxcal:
+            where.append("calories < %s")
+            args = args + (maxcal,)
+        if mincarb:
+            where.append("carbs > %s")
+            args = args + (mincarb,)
+        if maxcarb:
+            where.append("carbs < %s")
+            args = args + (maxcarb,)
+        if maxfat:
+            where.append("fat < %s")
+            args = args + (maxfat,)
+        if minfat:
+            where.append("fat > %s")
+            args = args + (minfat,)
+        if minpro:
+            where.append("protein > %s")
+            args = args + (minpro,)
+        if maxpro:
+            where.append("protein < %s")
+            args = args + (maxpro,)
+    W = " AND ".join(where)
+    query = query + W +";"       
+    
+
 
     cursor = conn.cursor()
     cursor.execute((query), (args))
@@ -156,42 +187,19 @@ def search_ingredient():
         query = (f"SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%( |$)\")")
         query = "("+query+") ing"
         query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
-    query = "SELECT name FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id"
+    query = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
     
-    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
-        where = ""
-        query = "SELECT * FROM (" +query+ ")rec WHERE "
-        if mincal:
-            where.append("calories > %s")
-            args = args + (mincal,)
-        if maxcal:
-            where.append("calories < %s")
-            args = args + (maxcal,)
-        if mincarb:
-            where.append("carbs > %s")
-            args = args + (mincarb,)
-        if maxcarb:
-            where.append("carbs < %s")
-            args = args + (maxcarb,)
-        if maxfat:
-            where.append("fat < %s")
-            args = args + (maxfat,)
-        if minfat:
-            where.append("fat > %s")
-            args = args + (minfat,)
-        if minpro:
-            where.append("protein > %s")
-            args = args + (minpro,)
-        if maxpro:
-            where.append("protein < %s")
-            args = args + (maxpro,)
-    W = " AND ".join(where)
-    query = query + W        
-    
-
     cursor = conn.cursor()
     cursor.execute((query), (args))
     recipes = cursor.fetchall()
+    results = []
+    for recipe in recipes:
+        recipecols = {}
+        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
+        results.append(recipecols)
+    r = {'results':results}
+    return r
+            
 
 
 if __name__ == '__main__':
