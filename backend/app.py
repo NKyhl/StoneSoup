@@ -278,7 +278,7 @@ def update_user_goals():
 
     return {'message': 'User information updated'}, 200
 
-@app.route("/api/search/name", methods=['GET', 'POST'])
+@app.route("/api/search/name", methods=['POST'])
 def search_name():
     '''Search for Recipes by Name.'''
 
@@ -292,11 +292,27 @@ def search_name():
 
     name = request.json.get("search")
 
-    #cursor = conn.cursor()
-    #cursor.execute("SELECT * FROM Recipe WHERE name like '%%s%' LIMIT 10")
-    #res = cursor.fetchall()
-    #print(res)
-    #return "done"
+    if not name:
+        return {'message': 'Forbidden search'}, 400
+    
+    name.replace('%', '\\%').replace('_', '\\_')
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, category, url, img_url FROM Recipe WHERE name like '%{}%' LIMIT 100".format(name))
+    res = cursor.fetchall()
+    if not res:
+        return {'recipes': [], 'message': 'Error querying the database'}, 404
+    
+    recipes = []
+    for recipe in res:
+        recipes.append({
+            'name': recipe[0],
+            'category': recipe[1],
+            'url': recipe[2],
+            'img_url': recipe[3]
+        })
+
+    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
 
     words = name.split()
     mincal = request.json.get("minCal")
@@ -388,6 +404,8 @@ def search_name():
 @app.route("/api/search/ingredient", methods=['POST'])
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
+    return {'message': 'Not implemented'}, 400
+
     conn = mysql.connection
     if not conn:
         return {'message': 'The database is not available'}, 400
@@ -432,4 +450,4 @@ def search_ingredient():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
