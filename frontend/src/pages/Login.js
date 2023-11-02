@@ -31,8 +31,7 @@ function Login({ setUserID }) {
             return;
         }
 
-        setUserID(JSON.parse(res_json));
-
+        setUserID(res_json);
 
         navigate('/home');
     }
