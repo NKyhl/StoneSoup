@@ -82,9 +82,17 @@ def search_name():
      if not (conn := mysql.connection):
         return {'message': 'The database is not available'}, 400
 
-    name = request.json.get("search_name_string")
+    name = request.json.get("searchValue")
 
     words = name.split()
+    mincal = request.json.get("minCal")
+    maxcal = request.json.get("maxCal")
+    mincarb = request.json.get("minCarb")
+    maxcarb = request.json.get("maxCarb")
+    minfat = request.json.get("minFat")
+    maxfat = request.json.get("maxFat")
+    minpro = request.json.get("minProtein")
+    maxpro = request.json.get("maxProtein")
 
 
     querylist = []
@@ -149,6 +157,37 @@ def search_ingredient():
         query = "("+query+") ing"
         query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
     query = "SELECT name FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id"
+    
+    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
+        where = ""
+        query = "SELECT * FROM (" +query+ ")rec WHERE "
+        if mincal:
+            where.append("calories > %s")
+            args = args + (mincal,)
+        if maxcal:
+            where.append("calories < %s")
+            args = args + (maxcal,)
+        if mincarb:
+            where.append("carbs > %s")
+            args = args + (mincarb,)
+        if maxcarb:
+            where.append("carbs < %s")
+            args = args + (maxcarb,)
+        if maxfat:
+            where.append("fat < %s")
+            args = args + (maxfat,)
+        if minfat:
+            where.append("fat > %s")
+            args = args + (minfat,)
+        if minpro:
+            where.append("protein > %s")
+            args = args + (minpro,)
+        if maxpro:
+            where.append("protein < %s")
+            args = args + (maxpro,)
+    W = " AND ".join(where)
+    query = query + W        
+    
 
     cursor = conn.cursor()
     cursor.execute((query), (args))
