@@ -291,13 +291,21 @@ def search_name():
 
     words = name.split()
     mincal = request.json.get("minCal")
+    mincal = str(mincal)
     maxcal = request.json.get("maxCal")
+    maxcal = str(maxcal)
     mincarb = request.json.get("minCarb")
+    mincarb = str(mincarb)
     maxcarb = request.json.get("maxCarb")
+    maxcarb = str(maxcarb)
     minfat = request.json.get("minFat")
+    minfat = str(minfat)
     maxfat = request.json.get("maxFat")
+    maxfat = str(maxfat)
     minpro = request.json.get("minProtein")
+    minpro = str(minpro)
     maxpro = request.json.get("maxProtein")
+    maxpro = str(maxpro)
 
 
     querylist = []
