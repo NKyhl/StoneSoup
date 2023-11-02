@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import UserPage from "./pages/UserPage";
 import PrivateRoutes from './utils/PrivateRoutes';
 import { useState } from 'react';
+import Landing from './pages/Landing';
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
         </Route>
         <Route path="/login" element={<Login setUserData={setUserData} />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/" element={<Landing />}></Route>
       </Routes>
     </Router>
   );

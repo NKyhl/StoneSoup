@@ -51,7 +51,37 @@ def validate_username(username=''):
         return {'message': 'The database is not available'}, 400
 
     query = "SELECT name FROM User WHERE name = %s"
-    args = (request.json.get('username', username),)
+    args = (username,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    validated = cursor.fetchall()
+    cursor.close()
+    return {'exists': bool(validated)}
+
+@app.route("/api/validate/email", methods=['POST'])
+def validate_email(email=''):
+    """
+    Validate that email exists in the database.
+
+    Called via HTTP endpoint, or by passing username parameter to
+    function from other endpoints.
+    """
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    email = request.json.get('email') if not email else email
+
+    if not email:
+        return {'message': 'Email not included'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+
+    query = "SELECT email FROM User WHERE email = %s"
+    args = (email,)
 
     cursor = conn.cursor()
     cursor.execute(query, args)
@@ -116,7 +146,7 @@ def validate_user(username='', email='', password=''):
 
     cursor = conn.cursor()
     cursor.execute(query, args)
-    
+
     user_info = cursor.fetchone()
     if user_info:
         name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
@@ -143,7 +173,7 @@ def api_signup():
     if not username:
         return {'message': 'Username not included'}, 400
     if not email:
-        return {'message': 'Password not included'}, 400
+        return {'message': 'Email not included'}, 400
     if not password:
         return {'message': 'Password not included'}, 400
     
@@ -203,6 +233,12 @@ def update_user_goals():
     # Validate User
     if not validate_user(username, email, password)['valid']:
         return {'message': 'This is not a valid user'}, 400
+    
+    # Make sure User can't set username or email to existing account
+    if username and validate_username(username)['exists']:
+        return {'message': 'This username is taken'}, 400
+    if email and validate_email(email)['exists']:
+        return {'message': 'This email is taken'}, 400
 
     # Update User Info
     query = "UPDATE User SET"
@@ -243,12 +279,128 @@ def update_user_goals():
 @app.route("/api/search/name")
 def search_name():
     '''Search for Recipes by Name.'''
-    pass
+     if not (conn := mysql.connection):
+        return {'message': 'The database is not available'}, 400
+
+    name = request.json.get("searchValue")
+
+    words = name.split()
+    mincal = request.json.get("minCal")
+    maxcal = request.json.get("maxCal")
+    mincarb = request.json.get("minCarb")
+    maxcarb = request.json.get("maxCarb")
+    minfat = request.json.get("minFat")
+    maxfat = request.json.get("maxFat")
+    minpro = request.json.get("minProtein")
+    maxpro = request.json.get("maxProtein")
+
+
+    querylist = []
+    wherelist = []
+    x=0
+    args = ()
+    if len(words) > 1:
+        for word in words:
+            leta = chr(ord('a') + x)
+            querylist.append(f"(SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")){leta}")
+            x=x+1
+            args = args + (word,)
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.name = {letb}.name ")
+
+        query = "SELECT a.name FROM "+", ".join(querylist)+" WHERE"
+        where = " AND ".join(wherelist)
+        query = query + where
+    else:
+        args = (words[0])
+        query = "SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
+    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
+        where = ""
+        query = "SELECT * FROM (" +query+ ")rec WHERE "
+        if mincal:
+            where.append("calories > %s")
+            args = args + (mincal,)
+        if maxcal:
+            where.append("calories < %s")
+            args = args + (maxcal,)
+        if mincarb:
+            where.append("carbs > %s")
+            args = args + (mincarb,)
+        if maxcarb:
+            where.append("carbs < %s")
+            args = args + (maxcarb,)
+        if maxfat:
+            where.append("fat < %s")
+            args = args + (maxfat,)
+        if minfat:
+            where.append("fat > %s")
+            args = args + (minfat,)
+        if minpro:
+            where.append("protein > %s")
+            args = args + (minpro,)
+        if maxpro:
+            where.append("protein < %s")
+            args = args + (maxpro,)
+    W = " AND ".join(where)
+    query = query + W +";"       
+    
+
+
+    cursor = conn.cursor()
+    cursor.execute((query), (args))
+    recipes = cursor.fetchall()
+
+        
 
 @app.route("/api/search/ingredient")
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
-    pass
+    name = request.json("search_ingredient_string")
+
+    words = name.split()
+
+    querylist = []
+    wherelist = []
+    x = 0
+    args = ()
+
+    if len(words) > 1:
+        for word in words:
+            leta = chr(ord('a') + x)
+            query = ("SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%s( |$)\")")
+            query = "("+query+") ing"
+            query = ("(SELECT recipe_id FROM "+query+f", MadeWith m WHERE m.ingredient_id = ing.id) {leta}")
+            querylist.append(query)
+            x=x+1
+            args = args + (word,)
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
+        where = " AND ".join(wherelist)
+        query = ",".join(querylist)
+        query = "(SELECT a.recipe_id FROM " + query + " WHERE " +where +") id"
+
+    else:
+        query = (f"SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%( |$)\")")
+        query = "("+query+") ing"
+        query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
+    query = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
+    
+    cursor = conn.cursor()
+    cursor.execute((query), (args))
+    recipes = cursor.fetchall()
+    results = []
+    for recipe in recipes:
+        recipecols = {}
+        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
+        results.append(recipecols)
+    r = {'results':results}
+    return r
+            
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5036, host='db8.cse.nd.edu')
