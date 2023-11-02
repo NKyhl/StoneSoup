@@ -4,14 +4,39 @@ import SearchIcon from '@mui/icons-material/Search';
 
 function Search(){
 
-    const [minCal, setMinCal] = useState(null);
-    const [maxCal, setMaxCal] = useState(null);
-    const [minCarb, setMinCarb] = useState(null);
-    const [maxCarb, setMaxCarb] = useState(null);
-    const [minFat, setMinFat] = useState(null);
-    const [maxFat, setMaxFat] = useState(null);
-    const [minProtein, setMinProtein] = useState(null);
-    const [maxProtein, setMaxProtein] = useState(null);
+    const [searchValue, setSearchValue] = useState("");
+    const [minCal, setMinCal] = useState("");
+    const [maxCal, setMaxCal] = useState("");
+    const [minCarb, setMinCarb] = useState("");
+    const [maxCarb, setMaxCarb] = useState("");
+    const [minFat, setMinFat] = useState("");
+    const [maxFat, setMaxFat] = useState("");
+    const [minProtein, setMinProtein] = useState("");
+    const [maxProtein, setMaxProtein] = useState("");
+
+    const handleSearch = async (e) => {
+        let data = {
+            "search" : searchValue,
+            "minCal" : minCal,
+            "maxCal" : maxCal,
+            "minCarb" : minCarb,
+            "maxCarb" : maxCarb,
+            "minFat" : minFat,
+            "maxFat" : maxFat,
+            "minProtein" : minProtein,
+            "maxProtein" : maxProtein
+        };
+
+        const res = await fetch('/api/search/name', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        console.log(data);
+    }
 
 
     return (
@@ -19,9 +44,9 @@ function Search(){
         <div className="search-container"> 
             <div className="wrap">
                 <div className="search">
-                    <input type="text" className="searchTerm" placeholder="What are you looking for?"/>
+                    <input type="text" className="searchTerm" placeholder="What are you looking for?" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
                     <button type="submit" className="searchButton">
-                        <SearchIcon />
+                        <SearchIcon onClick={handleSearch}/>
                     </button>
                 </div>
             </div>

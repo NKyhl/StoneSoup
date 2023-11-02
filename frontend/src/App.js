@@ -4,15 +4,22 @@ import "./styles.css";
 import HomePage from './pages/HomePage';
 import Login from "./pages/Login";
 import UserPage from "./pages/UserPage";
+import PrivateRoutes from './utils/PrivateRoutes';
+import { useState } from 'react';
 
 function App() {
+
+  const [userID, setUserID] = useState(1);
+
   return (  
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />}></Route>
-        <Route path="/login" element={<Login />}></Route>
+        <Route element={<PrivateRoutes userID={userID} />}>
+          <Route path="/user" element={<UserPage userID={userID} />}></Route>
+          <Route path="/home" element={<HomePage userID={userID} />}></Route>
+        </Route>
+        <Route path="/login" element={<Login setUserID={setUserID} />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
-        <Route path="/user" element={<UserPage />}></Route>
       </Routes>
     </Router>
   );
