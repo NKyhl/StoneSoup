@@ -1,9 +1,9 @@
 import { Outlet, Navigate } from 'react-router-dom';
 
-const PrivateRoutes = ({ userID }) => {
+const PrivateRoutes = ({ userData }) => {
 
     return(
-        userID ? <Outlet/> : <Navigate to="/login"/>
+        userData ? <Outlet/> : <Navigate to="/login"/>
     );
 }
 

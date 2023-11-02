@@ -4,29 +4,78 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import ProfileIconMenu from "./ProfileIconMenu";
 
-const images = {
-    carrot: require("../../icons/003-carrot.png"),
-    broccoli: require("../../icons/001-broccoli.png"),
-    cabbage: require("../../icons/002-cabbage.png"),
-    eggplant: require("../../icons/004-eggplant.png"),
-    corn: require("../../icons/005-corn.png"),
-    pumpkin: require("../../icons/006-pumpkin.png"),
-    onion: require("../../icons/007-onion.png"),
-    bellPepper: require("../../icons/008-bell-pepper.png"),
-    potato: require("../../icons/009-potato.png"),
-    tomato: require("../../icons/010-tomato.png"),
-  };
+const images = [require("../../icons/003-carrot.png"),
+                require("../../icons/001-broccoli.png"),
+                require("../../icons/002-cabbage.png"),
+                require("../../icons/004-eggplant.png"),
+                require("../../icons/005-corn.png"),
+                require("../../icons/006-pumpkin.png"),
+                require("../../icons/007-onion.png"),
+                require("../../icons/008-bell-pepper.png"),
+                require("../../icons/009-potato.png"),
+                require("../../icons/010-tomato.png")
+];
 
-function Profile(){
+function Profile({ userData, setUserData }){
+    const [name, setName] = useState(userData.name);
+    const [email, setEmail] = useState(userData.cal_goal);
+    const [calories, setCalories] = useState(userData.cal_goal);
+    const [carbs, setCarbs] = useState(userData.carb_goal);
+    const [protein, setProtein] = useState(userData.protein_goal);
+    const [fat, setFat] = useState(userData.fat_goal);
 
     const [edit, setEdit] = useState(false);
     const [editIcon, setEditIcon] = useState(false);
 
-    const pic = "carrot";
+    const [pic, setPic] = useState(userData.icon_id ? userData.icon_id : 0)
+
+    const handleSave = async () => { 
+        // Update User Info in database
+        let data = {
+            'username': name,
+            'email' : email,
+            'password': userData.password,
+            'cal_goal': calories,
+            'carb_goal': carbs,
+            'protein_goal': protein,
+            'fat_goal': fat
+        }
+        
+        const res = await fetch('/api/update/user', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Display Error Messages
+        if(!res.ok && res.status != 404){
+            const res_json = await res.json();
+            alert(res_json.message);
+
+        // Success
+        } else {
+            // Update User Info on front-end
+            setUserData({
+                ...userData,
+                'username': name,
+                'email' : email,
+                'password': userData.password,
+                'cal_goal': calories,
+                'carb_goal': carbs,
+                'protein_goal': protein,
+                'fat_goal': fat
+            })
+
+            // End Editing
+            setEdit(false)
+        }
+    };
 
     return (
         <div className="profile-bar">
-            <ProfileIconMenu trigger={editIcon} setTrigger={setEditIcon}>
+            <ProfileIconMenu userData={userData} setUserData={setUserData} setPic={setPic} trigger={editIcon} setTrigger={setEditIcon}>
                 
             </ProfileIconMenu>
             <div className="icon-wrapper">
@@ -39,7 +88,7 @@ function Profile(){
                     </IconButton>
                 </div>
             </div>
-            <h3>Username</h3>
+            <h3>{userData.name ? userData.name : "Username"}</h3>
             <IconButton style={ {position : "absolute" , right : "3%" , top: "29%", display: !edit ? 'block' : 'None'}} onClick={() => setEdit(true)} aria-label="edit">
                     <EditIcon />
             </IconButton>
@@ -48,27 +97,27 @@ function Profile(){
                 <hr></hr>
             </div>
             <div className="profile-attribute profile">
-                <label htmlFor="name">Name</label>
-                <input disabled={!edit} type="text" id="name" placeholder="Username" style={{ border: edit ? '1px solid black' : 'None' }}></input>
+                <label htmlFor="name">Username</label>
+                <input disabled={!edit} type="text" id="name" placeholder={userData.name ? userData.name : "Username"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setName(e.target.value)}></input>
                 <label htmlFor="email">Email</label>
-                <input disabled={!edit} type="text" id="email" placeholder="Email" style={{ border: edit ? '1px solid black' : 'None' }}></input>
+                <input disabled={!edit} type="text" id="email" placeholder={userData.email ? userData.email : "Email"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setEmail(e.target.value)}></input>
             </div>
             <div className="hr-text">
-                <h3>Goals</h3>      
+                <h3>Daily Goals</h3>      
                 <hr></hr>
             </div>
             <div className="profile-attribute profile">
                 <label htmlFor="cals">Calories</label>
-                <input disabled={!edit} type="text" id="cals" placeholder="Calores" style={{ border: edit ? '1px solid black' : 'None' }}></input>
+                <input disabled={!edit} type="text" id="cals" placeholder={userData.cal_goal ? userData.cal_goal : "Calories"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setCalories(e.target.value)}></input>
                 <label htmlFor="carbs">Carbs</label>
-                <input disabled={!edit} type="text" id="carbs" placeholder="Carbs" style={{ border: edit ? '1px solid black' : 'None' }}></input>
+                <input disabled={!edit} type="text" id="carbs" placeholder={userData.carb_goal ? userData.carb_goal : "Carbs"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setCarbs(e.target.value)}></input>
                 <label htmlFor="proteins">Proteins</label>
-                <input disabled={!edit} type="text" id="proteins" placeholder="Protens" style={{ border: edit ? '1px solid black' : 'None' }}></input>
+                <input disabled={!edit} type="text" id="proteins" placeholder={userData.protein_goal ? userData.protein_goal : "Protein"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setProtein(e.target.value)}></input>
                 <label htmlFor="fats">Fats</label>
-                <input disabled={!edit} type="text" id="fats" placeholder="Fats" style={{ border: edit ? '1px solid black' : 'None' }}  ></input>
+                <input disabled={!edit} type="text" id="fats" placeholder={userData.fat_goal ? userData.fat_goal : "Fats"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setFat(e.target.value)}></input>
             </div>
             <div className="profile-btns">
-                <IconButton style={ {display: edit ? 'block' : 'None'}} onClick={() => setEdit(false)} aria-label="save">
+                <IconButton style={ {display: edit ? 'block' : 'None'}} onClick={handleSave} aria-label="save">
                     <SaveIcon />
                 </IconButton>
             </div>

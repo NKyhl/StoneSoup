@@ -10,7 +10,7 @@ app.config['MYSQL_DB'] = 'nkyhl'
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 
-@app.route("/")
+@app.route("/home")
 def index():
     return app.send_static_file('index.html')
 
@@ -135,19 +135,24 @@ def validate_user(username='', email='', password=''):
         return response, 400
 
     # If valid, return user info as well
-    query = "SELECT cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
-    args = (username,)
+    query = "SELECT name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
+
+    if username:
+        args = (username,)
+        query += " WHERE name = %s"
+    else:
+        args = (email,)
+        query += " WHERE email = %s"
 
     cursor = conn.cursor()
     cursor.execute(query, args)
 
-    response['username'] = username
-    response['email'] = email
-    response['password'] = password
-
     user_info = cursor.fetchone()
     if user_info:
-        cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        response['name'] = name
+        response['email'] = email
+        response['password'] = password
         response['cal_goal'] = cal_goal
         response['fat_goal'] = fat_goal
         response['protein_goal'] = protein_goal
@@ -178,6 +183,8 @@ def api_signup():
     
     if validate_username(username)['exists']:
         return {'message': 'Username already taken'}, 400
+    if validate_email(email)['exists']:
+        return {'message': 'Email already taken'}, 400
     
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -195,7 +202,7 @@ def api_signup():
         return {'message': 'Error in creating user'}, 400
     return {'message': 'Your account has been created'}, 200
 
-@app.route("/api/update/user-goals", methods=['POST'])
+@app.route("/api/update/user", methods=['POST'])
 def update_user_goals():
     if not request.json:
         return {'message': 'application/json format required'}, 400
@@ -214,7 +221,7 @@ def update_user_goals():
 
     icon_id = request.json.get('icon_id')
 
-    if not username or not email:
+    if not username and not email:
         return {'message': 'Username or email required'}, 400
     if not password:
         return {'message': 'Password not included'}, 400
@@ -230,9 +237,9 @@ def update_user_goals():
         return {'message': 'This is not a valid user'}, 400
     
     # Make sure User can't set username or email to existing account
-    if username and validate_username(username)['exists']:
+    if new_username and validate_username(new_username)['exists']:
         return {'message': 'This username is taken'}, 400
-    if email and validate_email(email)['exists']:
+    if new_email and validate_email(new_email)['exists']:
         return {'message': 'This email is taken'}, 400
 
     # Update User Info
@@ -267,12 +274,14 @@ def update_user_goals():
 
     cursor = conn.cursor()
     cursor.execute(query, tuple(args))
+    conn.commit()
 
     return {'message': 'User information updated'}, 200
 
 @app.route("/api/search/name", methods=['GET', 'POST'])
 def search_name():
     '''Search for Recipes by Name.'''
+
     if not request.json or 'search' not in request.json:
         return {'message': 'application/json format required'}, 400
 
@@ -382,7 +391,7 @@ def search_ingredient():
     conn = mysql.connection
     if not conn:
         return {'message': 'The database is not available'}, 400
-        
+
     name = request.json("search_ingredient_string")
 
     words = name.split()

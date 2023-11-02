@@ -16,24 +16,53 @@ import SaveIcon from '@mui/icons-material/Save';
 
 function ProfileIconMenu(props){
 
-    const [selectedImage, setSelectedImage] = useState(null);
-
-    console.log(selectedImage);
+    const [selectedImage, setSelectedImage] = useState(props.userData.icon_id ? props.userData.icon_id : null);
 
     const images = [carrot, broccoli, cabbage, eggplant, corn, pumpkin, onion, bellPepper, potato, tomato];
 
     const handleImageClick = (image) => {
         setSelectedImage(image);
-      };
+    };
 
     const handleWindowClose = () => {
         setSelectedImage(null);
         props.setTrigger(false);
     };
 
-    const handleSave = () => {
-        setSelectedImage(null);
-        props.setTrigger(false);
+    const handleSave = async () => {
+        if (!selectedImage) {return;}
+        
+        // Update icon_id in database
+        let data = {
+            'username': props.userData ? props.userData.name : '',
+            'email' : props.userData ? props.userData.email : '',
+            'password': props.userData ? props.userData.password : '',
+            'icon_id': selectedImage
+        }
+        
+        const res = await fetch('/api/update/user', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Display Error Messages
+        if(!res.ok && res.status != 404){
+            const res_json = await res.json();
+            alert(res_json.message);
+
+        // Success
+        } else {
+            // Update Icon on front-end
+            props.setUserData({...props.userData, icon_id: selectedImage}); // set user data on frontend
+            props.setPic(selectedImage); // update displayed photo - may not be needed because of above.
+
+            // Close Profile Icon Menu
+            setSelectedImage(null);
+            props.setTrigger(false);
+        }
     };
 
     return (props.trigger) ? (

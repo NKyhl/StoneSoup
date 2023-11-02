@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import StoneSoupIcon from "./../../StoneSoupIcon.png";
 
-function Header() {
+function Header({ userData }) {
   
     return (
     <header className="header-outer">
@@ -13,8 +13,8 @@ function Header() {
             <nav className="header-navigation">
                 <Link to="/home">Home</Link>
                 <Link to="/user">User</Link>
-                <Link to="/login">Sign In</Link>
-                <Link to="/signup">Sign Up</Link>
+                {userData ? '' : <Link to="/login">Sign In</Link>}
+                {userData ? '' : <Link to="/signup">Sign Up</Link>}
                 <button>Menu</button>
             </nav>
         </div>

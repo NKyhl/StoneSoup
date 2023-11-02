@@ -1,12 +1,12 @@
 import Header from "./components/Header";
 import Profile from "./components/Profile";
 
-function UserPage(){
+function UserPage({ userData, setUserData }){
     return (
         <>
-        <Header></Header>
+        <Header userData={userData} ></Header>
         <main className="user-main">
-            <Profile></Profile>
+            <Profile userData={userData} setUserData={setUserData} ></Profile>
         </main>
         </>
     );
