@@ -39,12 +39,7 @@
     font-size: 20px;
   }
   
-  /*Resize the wrap to see the search bar change!*/
   .wrap{
     width: 700px;
     margin: 10px 50px 0 150px;
-    /* position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translate(-50%, -50%); */
   }

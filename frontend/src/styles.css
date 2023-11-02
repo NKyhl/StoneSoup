@@ -285,8 +285,8 @@ body {
 
 .image-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Create 3 columns */
-    gap: 10px; /* Adjust the gap between items */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
 }
 
 .grid-item {
@@ -298,13 +298,13 @@ body {
     max-height: 80%;
     border: 2px solid lightblue;
     border-radius: 50%;
-    transition: transform 0.3s; /* Smooth transition for zoom effect */
+    transition: transform 0.3s;
 }
 
 .selected {
     border: 2px solid black !important;
     border-radius: 50%;
-    transform: scale(1.2); /* Increase size by 20% when selected */
+    transform: scale(1.2);
 }
 
 
