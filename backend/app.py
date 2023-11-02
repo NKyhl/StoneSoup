@@ -270,13 +270,14 @@ def update_user_goals():
 
     return {'message': 'User information updated'}, 200
 
-@app.route("/api/search/name")
+@app.route("/api/search/name", methods=['POST'])
 def search_name():
     '''Search for Recipes by Name.'''
-     if not (conn := mysql.connection):
+    conn = mysql.connection
+    if not conn:
         return {'message': 'The database is not available'}, 400
 
-    name = request.json.get("searchValue")
+    name = request.json.get("search")
 
     words = name.split()
     mincal = request.json.get("minCal")
@@ -308,10 +309,10 @@ def search_name():
         where = " AND ".join(wherelist)
         query = query + where
     else:
-        args = (words[0])
-        query = "SELECT name FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
+        args = (words[0],)
+        query = "SELECT * FROM Recipe WHERE name REGEXP (\"(^| )%s( |$)\")"
     if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
-        where = ""
+        where = []
         query = "SELECT * FROM (" +query+ ")rec WHERE "
         if mincal:
             where.append("calories > %s")
@@ -337,20 +338,31 @@ def search_name():
         if maxpro:
             where.append("protein < %s")
             args = args + (maxpro,)
-    W = " AND ".join(where)
-    query = query + W +";"       
+        W = " AND ".join(where)
+        query = query + W +";"       
     
-
-
+    print(query%args)
     cursor = conn.cursor()
-    cursor.execute((query), (args))
+    cursor.execute(query, args)
     recipes = cursor.fetchall()
-
+    results = []
+    print(recipes)
+    for recipe in recipes:
+        recipecols = {}
+        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
+        results.append(recipecols)
+    r = {'results':results}
+    print(r)
+    return r
         
 
 @app.route("/api/search/ingredient")
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+        
     name = request.json("search_ingredient_string")
 
     words = name.split()
@@ -386,13 +398,7 @@ def search_ingredient():
     cursor = conn.cursor()
     cursor.execute((query), (args))
     recipes = cursor.fetchall()
-    results = []
-    for recipe in recipes:
-        recipecols = {}
-        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
-        results.append(recipecols)
-    r = {'results':results}
-    return r
+    return "hgfsdj"
             
 
 
