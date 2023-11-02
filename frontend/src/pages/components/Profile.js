@@ -50,7 +50,7 @@ function Profile({ userData, setUserData }){
         });
 
         // Display Error Messages
-        if(!res.ok && res.status != 404){
+        if(!res.ok && res.status !== 404){
             const res_json = await res.json();
             alert(res_json.message);
 

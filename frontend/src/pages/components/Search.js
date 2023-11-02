@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./search.css"
 import SearchIcon from '@mui/icons-material/Search';
 import Recipes from "./Recipes";
@@ -16,10 +16,17 @@ function Search(){
     const [minProtein, setMinProtein] = useState("");
     const [maxProtein, setMaxProtein] = useState("");
 
-    const [recipes, setRecipes] = useState([{"name": "1"}, {"name": "2"}, {"name": "3"}, {"name": "4"},{"name": "5"},{"name": "6"},{"name": "7"},{"name": "8"},{"name": "9"},{"name": "10"},{"name": "11"},{"name": "12"},]);
+    const [recipes, setRecipes] = useState([{"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"}]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
+    // useEffect(() => {
+    //     const recipesPerPage = 10;
+    //     const indexOfLastRecipe = currentPage * recipesPerPage;
+    //     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+    //     const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+
+    // }, [recipes]);
     const recipesPerPage = 10;
     const indexOfLastRecipe = currentPage * recipesPerPage;
     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
@@ -58,13 +65,15 @@ function Search(){
         }
 
         const res_json = await res.json();
-        setRecipes(res_json.results);
+        console.log(res_json.recipes);
+        setRecipes(res_json.recipes);
         setLoading(false);
     }
 
 
     return (
         <>
+        <div className="search-parent">
         <div className="search-container"> 
             <div className="wrap">
                 <div className="search">
@@ -148,6 +157,7 @@ function Search(){
             </div>
             <Recipes recipes={currentRecipes} loading={loading}></Recipes>
             <Pagination count={Math.ceil(recipes.length / recipesPerPage)} onChange={handleChange} ></Pagination>
+            </div>
         </>
     );
 }
