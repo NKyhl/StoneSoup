@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./search.css"
 import SearchIcon from '@mui/icons-material/Search';
+import Recipes from "./Recipes";
+import { Pagination } from "@mui/material";
 
 function Search(){
 
@@ -14,7 +16,23 @@ function Search(){
     const [minProtein, setMinProtein] = useState("");
     const [maxProtein, setMaxProtein] = useState("");
 
+    const [recipes, setRecipes] = useState([{"name": "1"}, {"name": "2"}, {"name": "3"}, {"name": "4"},{"name": "5"},{"name": "6"},{"name": "7"},{"name": "8"},{"name": "9"},{"name": "10"},{"name": "11"},{"name": "12"},]);
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const recipesPerPage = 10;
+    const indexOfLastRecipe = currentPage * recipesPerPage;
+    const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+    const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+
+    const handleChange = (event, value) => {
+        setCurrentPage(value);
+      };
+
+
     const handleSearch = async (e) => {
+
+        setLoading(true);
         let data = {
             "search" : searchValue,
             "minCal" : minCal,
@@ -35,7 +53,13 @@ function Search(){
             body: JSON.stringify(data)
         });
 
-        console.log(data);
+        if(!res.ok){
+            return;
+        }
+
+        const res_json = await res.json();
+        setRecipes(res_json.results);
+        setLoading(false);
     }
 
 
@@ -122,6 +146,8 @@ function Search(){
                 </div>
             </div>
             </div>
+            <Recipes recipes={currentRecipes} loading={loading}></Recipes>
+            <Pagination count={Math.ceil(recipes.length / recipesPerPage)} onChange={handleChange} ></Pagination>
         </>
     );
 }
