@@ -51,7 +51,37 @@ def validate_username(username=''):
         return {'message': 'The database is not available'}, 400
 
     query = "SELECT name FROM User WHERE name = %s"
-    args = (request.json.get('username', username),)
+    args = (username,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    validated = cursor.fetchall()
+    cursor.close()
+    return {'exists': bool(validated)}
+
+@app.route("/api/validate/email", methods=['POST'])
+def validate_email(email=''):
+    """
+    Validate that email exists in the database.
+
+    Called via HTTP endpoint, or by passing username parameter to
+    function from other endpoints.
+    """
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    email = request.json.get('email') if not email else email
+
+    if not email:
+        return {'message': 'Email not included'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+
+    query = "SELECT email FROM User WHERE email = %s"
+    args = (email,)
 
     cursor = conn.cursor()
     cursor.execute(query, args)
@@ -111,6 +141,10 @@ def validate_user(username='', email='', password=''):
     cursor = conn.cursor()
     cursor.execute(query, args)
 
+    response['username'] = username
+    response['email'] = email
+    response['password'] = password
+
     user_info = cursor.fetchone()
     if user_info:
         cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
@@ -134,7 +168,7 @@ def api_signup():
     if not username:
         return {'message': 'Username not included'}, 400
     if not email:
-        return {'message': 'Password not included'}, 400
+        return {'message': 'Email not included'}, 400
     if not password:
         return {'message': 'Password not included'}, 400
     
@@ -194,6 +228,12 @@ def update_user_goals():
     # Validate User
     if not validate_user(username, email, password)['valid']:
         return {'message': 'This is not a valid user'}, 400
+    
+    # Make sure User can't set username or email to existing account
+    if username and validate_username(username)['exists']:
+        return {'message': 'This username is taken'}, 400
+    if email and validate_email(email)['exists']:
+        return {'message': 'This email is taken'}, 400
 
     # Update User Info
     query = "UPDATE User SET"
