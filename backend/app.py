@@ -61,16 +61,19 @@ def validate_username(username=''):
     return {'exists': bool(validated)}
 
 @app.route("/api/validate/user", methods=['POST'])
-def validate_user():
+def validate_user(username='', email='', password=''):
     """
     Validate that a username/email and password combination are valid.
+
+    Called via HTTP endpoint, or by passing parameters to
+    function from other endpoints.
     """
     if not request.json:
         return {'message': 'application/json format required'}, 400
     
-    username = request.json.get('username')
-    email = request.json.get('email')
-    password = request.json.get('password')
+    username = request.json.get('username', username)
+    email = request.json.get('email', email)
+    password = request.json.get('password', password)
 
     if not username and not email:
         return {'message': 'Username or email required'}, 400
@@ -96,7 +99,28 @@ def validate_user():
     
     hashed_password = validated[0][0]
 
-    return {'valid': bcrypt.check_password_hash(hashed_password, password)}
+    response = {'valid': bcrypt.check_password_hash(hashed_password, password)}
+
+    if not response['valid']:
+        return response, 400
+
+    # If valid, return user info as well
+    query = "SELECT cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
+    args = (username,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    user_info = cursor.fetchone()
+    if user_info:
+        cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        response['cal_goal'] = cal_goal
+        response['fat_goal'] = fat_goal
+        response['protein_goal'] = protein_goal
+        response['carb_goal'] = carb_goal
+        response['icon_id'] = icon_id
+
+    return response
 
 @app.route("/api/signup", methods=['POST'])
 def api_signup():
@@ -136,6 +160,75 @@ def api_signup():
     if not validate_username(username)['exists']:
         return {'message': 'Error in creating user'}, 400
     return {'message': 'Your account has been created'}, 200
+
+@app.route("/api/update/user-goals", methods=['POST'])
+def update_user_goals():
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+    
+    username = request.json.get('username')
+    email = request.json.get('email')
+    password = request.json.get('password')
+
+    cal_goal = request.json.get('cal_goal')
+    protein_goal = request.json.get('protein_goal')
+    fat_goal = request.json.get('fat_goal')
+    carb_goal = request.json.get('carb_goal')
+
+    new_username = request.json.get('new_username')
+    new_email = request.json.get('new_email')
+
+    icon_id = request.json.get('icon_id')
+
+    if not username or not email:
+        return {'message': 'Username or email required'}, 400
+    if not password:
+        return {'message': 'Password not included'}, 400
+    if not cal_goal and not fat_goal and not carb_goal and not new_username and not new_email and not icon_id:
+        return {'message': 'No update included'}, 400
+    
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+    
+    # Validate User
+    if not validate_user(username, email, password)['valid']:
+        return {'message': 'This is not a valid user'}, 400
+
+    # Update User Info
+    query = "UPDATE User SET"
+    args = []
+    if cal_goal: 
+        query += " cal_goal = %s,"
+        args.append(cal_goal)
+    if protein_goal: 
+        query += " protein_goal = %s,"
+        args.append(protein_goal)
+    if fat_goal: 
+        query += " fat_goal = %s,"
+        args.append(fat_goal)
+    if carb_goal: 
+        query += " carb_goal = %s,"
+        args.append(carb_goal)
+    if new_username: 
+        query += " name = %s,"
+        args.append(new_username)
+    if new_email:
+        query += " email = %s,"
+        args.append(new_email)
+    if icon_id:
+        query += " icon_id = %s,"
+        args.append(icon_id)
+
+    query = query[:-1] # Remove last comma
+
+    query += " WHERE name = %s"
+    args.append(username)
+
+    cursor = conn.cursor()
+    cursor.execute(query, tuple(args))
+
+    return {'message': 'User information updated'}, 200
 
 @app.route("/api/search/name")
 def search_name():
