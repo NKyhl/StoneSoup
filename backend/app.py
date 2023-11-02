@@ -183,6 +183,8 @@ def api_signup():
     
     if validate_username(username)['exists']:
         return {'message': 'Username already taken'}, 400
+    if validate_email(email)['exists']:
+        return {'message': 'Email already taken'}, 400
     
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -235,9 +237,9 @@ def update_user_goals():
         return {'message': 'This is not a valid user'}, 400
     
     # Make sure User can't set username or email to existing account
-    if username and validate_username(username)['exists']:
+    if new_username and validate_username(new_username)['exists']:
         return {'message': 'This username is taken'}, 400
-    if email and validate_email(email)['exists']:
+    if new_email and validate_email(new_email)['exists']:
         return {'message': 'This email is taken'}, 400
 
     # Update User Info
@@ -279,7 +281,8 @@ def update_user_goals():
 @app.route("/api/search/name")
 def search_name():
     '''Search for Recipes by Name.'''
-     if not (conn := mysql.connection):
+    conn = mysql.connection
+    if not conn:
         return {'message': 'The database is not available'}, 400
 
     name = request.json.get("searchValue")
@@ -357,6 +360,10 @@ def search_name():
 @app.route("/api/search/ingredient")
 def search_ingredient():
     '''Search for Recipes by Ingredient'''
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+
     name = request.json("search_ingredient_string")
 
     words = name.split()

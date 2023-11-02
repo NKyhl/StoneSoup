@@ -6,7 +6,7 @@ function HomePage({ userData, setUserData }){
 
     return (
         <>
-        <Header></Header>
+        <Header userData={userData} ></Header>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
             <h1>Welcome {userData.name ? userData.name : "User"}!</h1>
             <h1>My Meal Plan</h1>
