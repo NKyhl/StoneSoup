@@ -316,21 +316,21 @@ def search_name():
 
     words = name.split()
     mincal = request.json.get("minCal")
-    mincal = str(mincal)
+    mincal = int(mincal)
     maxcal = request.json.get("maxCal")
-    maxcal = str(maxcal)
+    maxcal = int(maxcal)
     mincarb = request.json.get("minCarb")
-    mincarb = str(mincarb)
+    mincarb = int(mincarb)
     maxcarb = request.json.get("maxCarb")
-    maxcarb = str(maxcarb)
+    maxcarb = int(maxcarb)
     minfat = request.json.get("minFat")
-    minfat = str(minfat)
+    minfat = int(minfat)
     maxfat = request.json.get("maxFat")
-    maxfat = str(maxfat)
+    maxfat = int((maxfat)
     minpro = request.json.get("minProtein")
-    minpro = str(minpro)
+    minpro = int(minpro)
     maxpro = request.json.get("maxProtein")
-    maxpro = str(maxpro)
+    maxpro = int(maxpro)
 
 
     querylist = []
@@ -359,28 +359,28 @@ def search_name():
         where = []
         query = "SELECT * FROM (" +query+ ")rec WHERE "
         if mincal:
-            where.append("calories > %s")
+            where.append("calories > %d")
             args.append(mincal)
         if maxcal:
-            where.append("calories < %s")
+            where.append("calories < %d")
             args.append(maxcal)
         if mincarb:
-            where.append("carbs > %s")
+            where.append("carbs > %d")
             args.append(mincarb)
         if maxcarb:
-            where.append("carbs < %s")
+            where.append("carbs < %d")
             args.append(maxcarb)
         if maxfat:
-            where.append("fat < %s")
+            where.append("fat < %d")
             args.append(maxfat)
         if minfat:
-            where.append("fat > %s")
+            where.append("fat > %d")
             args.append(minfat)
         if minpro:
-            where.append("protein > %s")
+            where.append("protein > %d")
             args.append(minpro)
         if maxpro:
-            where.append("protein < %s")
+            where.append("protein < %d")
             args.append(maxpro)
         W = " AND ".join(where)
         query = query + W +";"       
