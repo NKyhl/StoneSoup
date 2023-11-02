@@ -3,7 +3,7 @@ import StoneSoupIcon from "../StoneSoupIcon.png"
 import { Link, useNavigate } from 'react-router-dom';
 import "./login.css"
 
-function Login({ setUserID }) {
+function Login({ setUserData }) {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -31,7 +31,7 @@ function Login({ setUserID }) {
             return;
         }
 
-        setUserID(res_json);
+        setUserData(res_json);
 
         navigate('/home');
     }
