@@ -11,7 +11,7 @@ function Header() {
                 <h1>Stone Soup</h1>
             </div>
             <nav className="header-navigation">
-                <Link to="/">Home</Link>
+                <Link to="/home">Home</Link>
                 <Link to="/user">User</Link>
                 <Link to="/login">Sign In</Link>
                 <Link to="/signup">Sign Up</Link>
