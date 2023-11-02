@@ -345,6 +345,7 @@ def search_name():
     cursor = conn.cursor()
     cursor.execute(query, args)
     recipes = cursor.fetchall()
+    cursor.close()
     results = []
     print(recipes)
     for recipe in recipes:
