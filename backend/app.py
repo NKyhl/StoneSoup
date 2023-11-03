@@ -326,7 +326,7 @@ def search_name():
     minfat = request.json.get("minFat")
     minfat = int(minfat)
     maxfat = request.json.get("maxFat")
-    maxfat = int((maxfat)
+    maxfat = int(maxfat)
     minpro = request.json.get("minProtein")
     minpro = int(minpro)
     maxpro = request.json.get("maxProtein")
@@ -450,4 +450,4 @@ def search_ingredient():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5053, host='db8.cse.nd.edu')
