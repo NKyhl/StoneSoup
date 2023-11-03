@@ -291,20 +291,107 @@ def search_name():
 
 
     name = request.json.get("search")
+    if name.lower() == "stone":
+        name = "%"
 
     if not name:
         return {'message': 'Forbidden search'}, 400
     
     name.replace('%', '\\%').replace('_', '\\_')
-
-    cursor = conn.cursor()
-    cursor.execute("SELECT name, category, url, img_url FROM Recipe WHERE name like '%{}%' LIMIT 100".format(name))
-    res = cursor.fetchall()
-    if not res:
-        return {'recipes': [], 'message': 'Error querying the database'}, 404
     
+    words = name.split()
+    mincal = request.json.get("minCal")
+    if mincal:
+        mincal = int(mincal)
+    maxcal = request.json.get("maxCal")
+    if maxcal:
+        maxcal = int(maxcal)
+    mincarb = request.json.get("minCarb")
+    if mincarb:
+        mincarb = int(mincarb)
+    maxcarb = request.json.get("maxCarb")
+    if maxcarb:
+        maxcarb = int(maxcarb)
+    minfat = request.json.get("minFat")
+    if minfat:
+        minfat = int(minfat)
+    maxfat = request.json.get("maxFat")
+    if maxfat:
+        maxfat = int(maxfat)
+    minpro = request.json.get("minProtein")
+    if minpro:
+        minpro = int(minpro)
+    maxpro = request.json.get("maxProtein")
+    if maxpro:
+        maxpro = int(maxpro)
+
+
+    querylist = []
+    wherelist = []
+    leta = []
+    letb = []
+    x=0
+    args = []
+    if len(words) > 1:
+        for word in words:
+            leta.append(chr(ord('a') + x))
+            querylist.append("(SELECT * FROM Recipe WHERE name LIKE '%{}%' ){}")
+            args.append(word)
+            args.append(leta[x])
+            x+=1
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.name = {letb}.name ")
+
+        query = "SELECT a.* FROM "+", ".join(querylist)+" WHERE"
+        where = " AND ".join(wherelist)
+        query = query + where
+    else:
+        word = name
+        args.append(words[0])
+        query = "SELECT * FROM Recipe WHERE name like '%{}%' "
+ 
+    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
+        where = []
+        query = "SELECT * FROM (" +query+ ")rec WHERE "
+        if mincal:
+            where.append("calories > {}")
+            args.append(mincal)
+        if maxcal:
+            where.append("calories < {}")
+            args.append(maxcal)
+        if mincarb:
+            where.append("carbs > {}")
+            args.append(mincarb)
+        if maxcarb:
+            where.append("carbs < {}")
+            args.append(maxcarb)
+        if maxfat:
+            where.append("fat < {}")
+            args.append(maxfat)
+        if minfat:
+            where.append("fat > {}")
+            args.append(minfat)
+        if minpro:
+            where.append("protein > {}")
+            args.append(minpro)
+        if maxpro:
+            where.append("protein < {}")
+            args.append(maxpro)
+        W = " AND ".join(where)
+        query = query + W        
+    q = " LIMIT 100"
+    query+= q
+    query = "SELECT name, category, url, img_url FROM (" + query + ")end"
+    a = tuple(args)
+    print(query.format(*a)) 
+    curs = conn.cursor()
+    curs.execute(query.format(*a))
+    recs = curs.fetchall()
+    curs.close()
     recipes = []
-    for recipe in res:
+    for recipe in recs:
         recipes.append({
             'name': recipe[0],
             'category': recipe[1],
@@ -314,91 +401,6 @@ def search_name():
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
 
-    words = name.split()
-    mincal = request.json.get("minCal")
-    mincal = int(mincal)
-    maxcal = request.json.get("maxCal")
-    maxcal = int(maxcal)
-    mincarb = request.json.get("minCarb")
-    mincarb = int(mincarb)
-    maxcarb = request.json.get("maxCarb")
-    maxcarb = int(maxcarb)
-    minfat = request.json.get("minFat")
-    minfat = int(minfat)
-    maxfat = request.json.get("maxFat")
-    maxfat = int(maxfat)
-    minpro = request.json.get("minProtein")
-    minpro = int(minpro)
-    maxpro = request.json.get("maxProtein")
-    maxpro = int(maxpro)
-
-
-    querylist = []
-    wherelist = []
-    x=0
-    args = []
-    if len(words) > 1:
-        for word in words:
-            word = "%"+words+"%"
-            leta = chr(ord('a') + x)
-            querylist.append(f"(SELECT name FROM Recipe WHERE name LIKE '%s'){leta}")
-            x=x+1
-            args.append(word)
-        for i in range(1,x):
-            leta = chr(ord('a') + i-1)
-            letb = chr(ord('a') + i)
-            wherelist.append(f" {leta}.name = {letb}.name ")
-
-        query = "SELECT a.name FROM "+", ".join(querylist)+" WHERE"
-        where = " AND ".join(wherelist)
-        query = query + where
-    else:
-        args.append(words[0])
-        query = "SELECT * FROM Recipe WHERE name LIKE '%s' "
-    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
-        where = []
-        query = "SELECT * FROM (" +query+ ")rec WHERE "
-        if mincal:
-            where.append("calories > %d")
-            args.append(mincal)
-        if maxcal:
-            where.append("calories < %d")
-            args.append(maxcal)
-        if mincarb:
-            where.append("carbs > %d")
-            args.append(mincarb)
-        if maxcarb:
-            where.append("carbs < %d")
-            args.append(maxcarb)
-        if maxfat:
-            where.append("fat < %d")
-            args.append(maxfat)
-        if minfat:
-            where.append("fat > %d")
-            args.append(minfat)
-        if minpro:
-            where.append("protein > %d")
-            args.append(minpro)
-        if maxpro:
-            where.append("protein < %d")
-            args.append(maxpro)
-        W = " AND ".join(where)
-        query = query + W +";"       
-    
-    print(query%tuple(args))
-    curs = conn.cursor()
-    curs.execute(query, tuple(args))
-    recs = curs.fetchall()
-    curs.close()
-    print(recs)
-    results = []
-    for recipe in recs:
-        recipecols = {}
-        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
-        results.append(recipecols)
-    r = {'results':results}
-    print(r)
-    return r
         
 
 @app.route("/api/search/ingredient", methods=['POST'])
