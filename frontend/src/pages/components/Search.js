@@ -7,6 +7,7 @@ import { Pagination } from "@mui/material";
 function Search(){
 
     const [searchValue, setSearchValue] = useState("");
+	const [ingValue, setIngValue] = useState("");
     const [minCal, setMinCal] = useState("");
     const [maxCal, setMaxCal] = useState("");
     const [minCarb, setMinCarb] = useState("");
@@ -42,6 +43,7 @@ function Search(){
         setLoading(true);
         let data = {
             "search" : searchValue,
+			"ingredient" : ingValue,
             "minCal" : minCal,
             "maxCal" : maxCal,
             "minCarb" : minCarb,
@@ -78,6 +80,12 @@ function Search(){
             <div className="wrap">
                 <div className="search">
                     <input type="text" className="searchTerm" placeholder="What are you looking for?" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
+                    <button type="submit" className="searchButton">
+                        <SearchIcon onClick={handleSearch}/>
+                    </button>
+                </div>
+                <div className="search">
+                    <input type="text" className="searchTerm" placeholder="Any Specific Ingredient?" value={ingValue} onChange={(e) => setIngValue(e.target.value)}/>
                     <button type="submit" className="searchButton">
                         <SearchIcon onClick={handleSearch}/>
                     </button>

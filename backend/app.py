@@ -290,13 +290,64 @@ def search_name():
         return {'message': 'The database is not available'}, 400
 
 
+   
+    ing = request.json.get("ingredient")
+    if ing:
+
+
+        ingwords = ing.split()
+        inglet = []
+
+        ingquerylist = []
+        ingwherelist = []
+        x = 0
+        ingargs = []
+
+        if len(ingwords) > 1:
+            for word in ingwords:
+                inglet.append(chr(ord('a') + x))
+                ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+                ingquery = "("+ingquery+") ing"
+                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
+                ingquerylist.append(ingquery)
+                ingargs.append(word)
+                ingargs.append(inglet[x])
+                x = x+1
+            for i in range(1,x):
+                leta = chr(ord('a') + i-1)
+                letb = chr(ord('a') + i)
+                ingwherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
+            ingwhere = " AND ".join(ingwherelist)
+            ingquery = ",".join(ingquerylist)
+            ingquery = "(SELECT DISTINCT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
+
+        else:
+            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+            ingquery = "("+ingquery+") ing"
+            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) id"
+            ingargs.append(ingwords[0])
+        ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
+    
+
+        ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
+        #a = tuple(ingargs)
+        #print(ingquery.format(*a)) 
+        #curs = conn.cursor()
+        #curs.execute(ingquery.format(*a))
+        #recs = curs.fetchall()
+        #ingrecipes = []
+        #for recipe in recs:
+         #   ingrecipes.append({
+          #      'name': recipe[0],
+          #      'category': recipe[1],
+          #      'url': recipe[2],
+          #      'img_url': recipe[3]
+          #  })
+   
     name = request.json.get("search")
     if name.lower() == "stone":
         name = "%"
-
-    #if not name:
-        #return {'message': 'Forbidden search'}, 400
-    
+ 
     name.replace('%', '\\%').replace('_', '\\_')
     
     words = name.split()
@@ -386,13 +437,23 @@ def search_name():
             args.append(maxpro)
         W = " AND ".join(where)
         query = query + W        
-    q = " LIMIT 100"
-    query+= q
-    query = "SELECT name, category, url, img_url FROM (" + query + ")end"
+    if query:
+        fquery = "SELECT name, category, url, img_url FROM (" + query + ") name"
+    else:
+        fquery = ""
+    if ing:
+        if fquery:
+            fquery = "SELECT DISTINCT * FROM " + "("+ ingquery+") ing"+ "," + "("+fquery+") name" + " WHERE ing.name = name.name "
+            args = ingargs + args
+        else:
+            fquery = ingquery
+            args = ingargs
     a = tuple(args)
-    print(query.format(*a)) 
+    q = " LIMIT 100"
+    fquery+= q
+    print(fquery.format(*a)) 
     curs = conn.cursor()
-    curs.execute(query.format(*a))
+    curs.execute(fquery.format(*a))
     recs = curs.fetchall()
     curs.close()
     recipes = []
@@ -417,37 +478,37 @@ def search_ingredient():
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-    name = request.json("search_ingredient_string")
+    ingname = request.json("search_ingredient_string")
 
-    words = name.split()
+    ingwords = name.split()
 
-    querylist = []
-    wherelist = []
+    ingquerylist = []
+    ingwherelist = []
     x = 0
-    args = ()
+    ingargs = ()
 
-    if len(words) > 1:
+    if len(ingwords) > 1:
         for word in words:
             leta = chr(ord('a') + x)
-            query = ("SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%s( |$)\")")
-            query = "("+query+") ing"
-            query = ("(SELECT recipe_id FROM "+query+f", MadeWith m WHERE m.ingredient_id = ing.id) {leta}")
-            querylist.append(query)
+            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+            ingquery = "("+ingquery+") ing"
+            ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
+            ingquerylist.append(ingquery)
             x=x+1
-            args = args + (word,)
+            ingargs = ingargs + (word,)
         for i in range(1,x):
             leta = chr(ord('a') + i-1)
             letb = chr(ord('a') + i)
-            wherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
-        where = " AND ".join(wherelist)
-        query = ",".join(querylist)
-        query = "(SELECT a.recipe_id FROM " + query + " WHERE " +where +") id"
+            ingwherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
+        ingwhere = " AND ".join(ingwherelist)
+        ingquery = ",".join(ingquerylist)
+        ingquery = "(SELECT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
 
     else:
-        query = (f"SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%( |$)\")")
-        query = "("+query+") ing"
-        query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
-    query = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
+        ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+        ingquery = "("+query+") ing"
+        ingquery = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
+    ingquery = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
     
     cursor = conn.cursor()
     cursor.execute((query), (args))
