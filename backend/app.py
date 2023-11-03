@@ -294,8 +294,8 @@ def search_name():
     if name.lower() == "stone":
         name = "%"
 
-    if not name:
-        return {'message': 'Forbidden search'}, 400
+    #if not name:
+        #return {'message': 'Forbidden search'}, 400
     
     name.replace('%', '\\%').replace('_', '\\_')
     
@@ -347,14 +347,19 @@ def search_name():
         query = "SELECT a.* FROM "+", ".join(querylist)+" WHERE"
         where = " AND ".join(wherelist)
         query = query + where
-    else:
+    elif len(words) == 1:
         word = name
         args.append(words[0])
         query = "SELECT * FROM Recipe WHERE name like '%{}%' "
+    else: 
+        query = ""
  
     if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
         where = []
-        query = "SELECT * FROM (" +query+ ")rec WHERE "
+        if query:
+            query = "SELECT * FROM (" +query+ ")rec WHERE "
+        else:
+            query = "SELECT * FROM Recipe WHERE "
         if mincal:
             where.append("calories > {}")
             args.append(mincal)
