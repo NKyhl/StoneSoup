@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
 import "./calendar.css";  
 
-function WeekCalendar() {
+function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   const renderWeekDays = () => {
+
+    const handleDragOver = (e) => {
+      e.preventDefault();
+      e.target.style.backgroundColor = 'yellow';
+    }
+
+    const handleDragLeave = (e) => {
+      e.preventDefault();
+      e.target.style.backgroundColor = 'lightgrey';
+    }
+
+    const onDrop = (e, day, mealType) => {
+      var draggedRecipe = e.dataTransfer.getData('text/plain');
+      draggedRecipe = JSON.parse(draggedRecipe);
+      setWeekPlan((prevWeekPlan) => {
+        const newWeekPlan = { ...prevWeekPlan };
+        newWeekPlan[day] = { ...newWeekPlan[day], [mealType]: draggedRecipe };
+        return newWeekPlan;
+      });
+    }
+
     const days = [];
     const startDate = new Date(currentDate);
-    startDate.setDate(startDate.getDate() - startDate.getDay()); // Set to the beginning of the week (Sunday)
+    startDate.setDate(startDate.getDate() - startDate.getDay());
 
     for (let i = 0; i < 7; i++) {
       const day = new Date(startDate);
@@ -21,7 +42,14 @@ function WeekCalendar() {
             <div className="day-number">{day.getDate()}</div>
           </div>
           <div className='meals'>
-
+            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "breakfast")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["breakfast"]["name"]}</div>
+            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "lunch")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["lunch"]["name"]}</div>
+            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"]["name"]}</div>
+            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "snack")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["snack"]["name"]}</div>
           </div>
         </div>
       );

@@ -1,8 +1,55 @@
+import { useState } from "react";
 import Header from "./components/Header";
 import Search from "./components/Search";
 import WeekCalendar from "./components/WeekCalendar";
 
 function HomePage({ userData, setUserData }){
+
+    const [drag, setDrag] = useState(false);
+    const [weekPlan, setWeekplan] = useState({
+        Sunday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Monday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Tuesday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Wednesday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Thursday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Friday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+        Saturday: {
+          breakfast: "",
+          lunch: "",
+          dinner: "",
+          snack: "",
+        },
+      });
 
     return (
         <>
@@ -12,11 +59,11 @@ function HomePage({ userData, setUserData }){
             <h1>My Meal Plan</h1>
         </div>
         <main>
-            <WeekCalendar></WeekCalendar>
+            <WeekCalendar drag={drag} setDrag={setDrag} weekPlan={weekPlan} setWeekPlan={setWeekplan}></WeekCalendar>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
                 <h1>Add To Your Plan!</h1>
             </div>
-            <Search></Search>
+            <Search setDrag={setDrag}></Search>
         </main>
         </>
     );
