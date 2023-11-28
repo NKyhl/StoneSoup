@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./search.css"
 import SearchIcon from '@mui/icons-material/Search';
 import Recipes from "./Recipes";
 import { Pagination } from "@mui/material";
 
-function Search(){
+function Search({setDrag}){
 
     const [searchValue, setSearchValue] = useState("");
     const [minCal, setMinCal] = useState("");
@@ -20,13 +20,6 @@ function Search(){
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // useEffect(() => {
-    //     const recipesPerPage = 10;
-    //     const indexOfLastRecipe = currentPage * recipesPerPage;
-    //     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
-    //     const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
-
-    // }, [recipes]);
     const recipesPerPage = 10;
     const indexOfLastRecipe = currentPage * recipesPerPage;
     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
@@ -155,7 +148,7 @@ function Search(){
                 </div>
             </div>
             </div>
-            <Recipes recipes={currentRecipes} loading={loading}></Recipes>
+            <Recipes recipes={currentRecipes} loading={loading} setDrag={setDrag}></Recipes>
             <Pagination count={Math.ceil(recipes.length / recipesPerPage)} onChange={handleChange} ></Pagination>
             </div>
         </>
