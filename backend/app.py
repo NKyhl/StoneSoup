@@ -447,7 +447,192 @@ def search_ingredient():
     recipes = cursor.fetchall()
     return "hgfsdj"
             
+@app.route('/api/save/meal-plan', methods=['POST'])
+def save_meal_plan():
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
 
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'the database is not available'}, 400
+
+    data = request.json
+
+    user_id = data.get("user_id")
+    start_date = data.get("start_date")
+
+    if not user_id:
+        return {'message': 'user_id required'}, 400
+    if not start_date:
+        return {'message': 'start_date required'}, 400
+    
+    # Validate start_date is of DATE type
+    query = "SELECT WEEKOFYEAR(%s) IS NOT NULL"
+    args = (start_date,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'invalid start_date'}, 400
+    
+    # Validate that user_id exists
+    query = "SELECT COUNT(*) FROM User WHERE id = %s"
+    args = (user_id,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'user_id does not exist'}, 400
+    
+    # See if a meal plan exists
+    query = "SELECT COUNT(*) FROM SavedPlan WHERE user_id = %s and start_date = %s"
+    args = (user_id, start_date)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    exists = cursor.fetchone()[0]
+
+    # Save meal plan
+    meals = [
+        data.get('mon_breakfast'), data.get('mon_lunch'), data.get('mon_dinner'), data.get('mon_extra'),
+        data.get('tue_breakfast'), data.get('tue_lunch'), data.get('tue_dinner'), data.get('tue_extra'),
+        data.get('wed_breakfast'), data.get('wed_lunch'), data.get('wed_dinner'), data.get('wed_extra'),
+        data.get('thu_breakfast'), data.get('thu_lunch'), data.get('thu_dinner'), data.get('thu_extra'),
+        data.get('fri_breakfast'), data.get('fri_lunch'), data.get('fri_dinner'), data.get('fri_extra'),
+        data.get('sat_breakfast'), data.get('sat_lunch'), data.get('sat_dinner'), data.get('sat_extra'),
+        data.get('sun_breakfast'), data.get('sun_lunch'), data.get('sun_dinner'), data.get('sun_extra'),
+    ]
+    
+    if exists:
+        query = """
+        UPDATE SavedPlan
+        SET mon_breakfast = %s, mon_lunch = %s, mon_dinner = %s, mon_extra = %s, 
+            tue_breakfast = %s, tue_lunch = %s, tue_dinner = %s, tue_extra = %s,
+            wed_breakfast = %s, wed_lunch = %s, wed_dinner = %s, wed_extra = %s,
+            thu_breakfast = %s, thu_lunch = %s, thu_dinner = %s, thu_extra = %s,
+            fri_breakfast = %s, fri_lunch = %s, fri_dinner = %s, fri_extra = %s,
+            sat_breakfast = %s, sat_lunch = %s, sat_dinner = %s, sat_extra = %s,
+            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s
+        WHERE user_id = %s
+          AND start_date = %s
+        """
+        args = tuple(meals + [user_id, start_date])
+
+    else:
+        query = """
+        INSERT INTO SavedPlan (user_id, start_date, 
+            mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
+            tue_breakfast, tue_lunch, tue_dinner, tue_extra,
+            wed_breakfast, wed_lunch, wed_dinner, wed_extra,
+            thu_breakfast, thu_lunch, thu_dinner, thu_extra,
+            fri_breakfast, fri_lunch, fri_dinner, fri_extra,
+            sat_breakfast, sat_lunch, sat_dinner, sat_extra,
+            sun_breakfast, sun_lunch, sun_dinner, sun_extra
+        )
+        VALUES (
+            %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s
+        )
+        """
+        args = tuple([user_id, start_date] + meals)
+    
+    cursor.execute(query, args)
+
+    conn.commit()
+    cursor.close()
+
+    return {'message': 'Meal plan saved'}, 200
+
+@app.route('/api/get/meal-plan', methods=['POST'])
+def get_meal_plan():
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'the database is not available'}, 400
+
+    data = request.json
+
+    user_id = data.get("user_id")
+    start_date = data.get("start_date")
+
+    if not user_id:
+        return {'message': 'user_id required'}, 400
+    if not start_date:
+        return {'message': 'start_date required'}, 400
+    
+    # Validate start_date is of DATE type
+    query = "SELECT WEEKOFYEAR(%s) IS NOT NULL"
+    args = (start_date,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'invalid start_date'}, 400
+    
+    # Validate that user_id exists
+    query = "SELECT COUNT(*) FROM User WHERE id = %s"
+    args = (user_id,)
+
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'user_id does not exist'}, 400
+
+    # Get meal plan
+    query = """
+    SELECT mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
+        tue_breakfast, tue_lunch, tue_dinner, tue_extra,
+        wed_breakfast, wed_lunch, wed_dinner, wed_extra,
+        thu_breakfast, thu_lunch, thu_dinner, thu_extra,
+        fri_breakfast, fri_lunch, fri_dinner, fri_extra,
+        sat_breakfast, sat_lunch, sat_dinner, sat_extra,
+        sun_breakfast, sun_lunch, sun_dinner, sun_extra
+    FROM SavedPlan
+    WHERE user_id = %s
+      AND start_date = %s
+    """
+
+    args = (user_id, start_date)
+    
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    meals = cursor.fetchone()
+
+    conn.commit()
+    cursor.close()
+
+    result = {
+        'user_id': user_id,
+        'start_date': start_date
+    }
+
+    default = (None, None, None, None)
+    result['mon_breakfast'], result['mon_lunch'], result['mon_dinner'], result['mon_extra'] = meals[0:4] if meals else default
+    result['tue_breakfast'], result['tue_lunch'], result['tue_dinner'], result['tue_extra'] = meals[4:8] if meals else default
+    result['wed_breakfast'], result['wed_lunch'], result['wed_dinner'], result['wed_extra'] = meals[8:12] if meals else default
+    result['thu_breakfast'], result['thu_lunch'], result['thu_dinner'], result['thu_extra'] = meals[12:16] if meals else default
+    result['fri_breakfast'], result['fri_lunch'], result['fri_dinner'], result['fri_extra'] = meals[16:20] if meals else default
+    result['sat_breakfast'], result['sat_lunch'], result['sat_dinner'], result['sat_extra'] = meals[20:24] if meals else default
+    result['sun_breakfast'], result['sun_lunch'], result['sun_dinner'], result['sun_extra'] = meals[24:28] if meals else default
+
+    return result
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
