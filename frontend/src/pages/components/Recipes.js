@@ -9,7 +9,7 @@ function Recipes({ recipes, loading, setDrag }){
       e.dataTransfer.setData('text/plain', JSON.stringify(recipe));
     }
 
-    const handleDrag = (e, recipe) => {
+    const handleDrag = (e) => {
       if(window.scrollY >= 50){
         window.scrollBy(0, -2);
       }

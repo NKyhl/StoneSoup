@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import "./calendar.css";  
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import IconButton from '@mui/material/IconButton';
+import Summary from './Summary';
+import FlipCard from './FlipCard';
 
 function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
+
+  const [renderSummary, setRenderSummary] = useState(false);
+
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -10,16 +17,17 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
 
     const handleDragOver = (e) => {
       e.preventDefault();
-      e.target.style.backgroundColor = 'yellow';
+      e.currentTarget.style.backgroundColor = 'lightgrey';
     }
 
     const handleDragLeave = (e) => {
       e.preventDefault();
-      e.target.style.backgroundColor = 'lightgrey';
+      e.currentTarget.style.backgroundColor = '';
     }
 
     const onDrop = (e, day, mealType) => {
       var draggedRecipe = e.dataTransfer.getData('text/plain');
+      e.currentTarget.style.backgroundColor = '';
       draggedRecipe = JSON.parse(draggedRecipe);
       setWeekPlan((prevWeekPlan) => {
         const newWeekPlan = { ...prevWeekPlan };
@@ -42,14 +50,14 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
             <div className="day-number">{day.getDate()}</div>
           </div>
           <div className='meals'>
-            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
-      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "breakfast")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["breakfast"]["name"]}</div>
-            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
-      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "lunch")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["lunch"]["name"]}</div>
-            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
-      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"]["name"]}</div>
-            <div className='meal' style={{ backgroundColor: drag ? 'lightgrey' : '',}} onDragOver={handleDragOver}
-      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "snack")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["snack"]["name"]}</div>
+            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "breakfast")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["breakfast"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["breakfast"]}></FlipCard> : ''}</div>
+            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "lunch")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["lunch"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["lunch"]}></FlipCard> : ''}</div>
+            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["dinner"]}></FlipCard> : ''}</div>
+            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "snack")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["snack"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["snack"]}></FlipCard> : ''}</div>
           </div>
         </div>
       );
@@ -79,16 +87,76 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
     const endDateString = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     return `${startDateString}\u00A0\u00A0\u00A0-\u00A0\u00A0\u00A0${endDateString}`;
-  };  
+  };
+
+  const handleReset = () => {
+    setWeekPlan({
+      Sunday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Monday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Tuesday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Wednesday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Thursday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Friday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+      Saturday: {
+        breakfast: "",
+        lunch: "",
+        dinner: "",
+        snack: "",
+      },
+    });
+  }
+
+  const handleSummaryClick = () => {
+    setRenderSummary(true);
+  };
 
   return (
     <div className="week-calendar">
+      <Summary renderSummary={renderSummary} setRenderSummary={setRenderSummary} weekPlan={weekPlan}></Summary>
       <div className="calendar-header">
         <button onClick={handlePreviousWeek} className='week-buttons'>Previous Week</button>
         <h3>{getWeekRange()}</h3>
         <button onClick={handleNextWeek} className='week-buttons'>Next Week</button>
       </div>
       <div className="week-days">{renderWeekDays()}</div>
+      <div>
+        <button className="cal-button" style={{ marginRight : "0"}} onClick={handleSummaryClick}>Summary</button>
+        <button className="cal-button" >Save Plan</button>
+        <IconButton aria-label="delete" onClick={handleReset} >
+        <RestartAltIcon>
+        </RestartAltIcon>
+        </IconButton>
+      </div>
     </div>
   );
 };
