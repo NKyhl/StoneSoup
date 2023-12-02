@@ -635,4 +635,4 @@ def get_meal_plan():
     return result
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
