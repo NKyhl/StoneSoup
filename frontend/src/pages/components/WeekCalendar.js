@@ -13,6 +13,25 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
 
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+  const handleDragStart = (e, recipe) => {
+    setDrag(true);
+    e.dataTransfer.setData('text/plain', JSON.stringify(recipe));
+  }
+
+  const handleDragEnd = (e) => {
+    e.preventDefault();
+    setDrag(false);
+  }
+
+  const removeDay = (e, day, meal) => {
+    e.preventDefault();
+    setWeekPlan((prevWeekPlan) => {
+      const newWeekPlan = { ...prevWeekPlan };
+      newWeekPlan[day] = { ...newWeekPlan[day], [meal]: '' };
+      return newWeekPlan;
+    });
+  }
+
   const renderWeekDays = () => {
 
     const handleDragOver = (e) => {
@@ -50,13 +69,17 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
             <div className="day-number">{day.getDate()}</div>
           </div>
           <div className='meals'>
-            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["breakfast"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["breakfast"])}
+              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"breakfast");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "breakfast")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["breakfast"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["breakfast"]}></FlipCard> : ''}</div>
-            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["lunch"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["lunch"])}
+              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"lunch");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "lunch")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["lunch"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["lunch"]}></FlipCard> : ''}</div>
-            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["dinner"])}
+              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"dinner");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["dinner"]}></FlipCard> : ''}</div>
-            <div className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["snack"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["snack"])}
+              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"snack");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "snack")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["snack"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["snack"]}></FlipCard> : ''}</div>
           </div>
         </div>
@@ -149,13 +172,17 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
         <button onClick={handleNextWeek} className='week-buttons'>Next Week</button>
       </div>
       <div className="week-days">{renderWeekDays()}</div>
-      <div>
-        <button className="cal-button" style={{ marginRight : "0"}} onClick={handleSummaryClick}>Summary</button>
-        <button className="cal-button" >Save Plan</button>
-        <IconButton aria-label="delete" onClick={handleReset} >
-        <RestartAltIcon>
-        </RestartAltIcon>
-        </IconButton>
+      <div className='calendar-bottom'>
+        <h3>Click meals to show their information</h3>
+        <div className='bottom-buttons'>
+          <button className="cal-button" style={{ marginRight : "0"}} onClick={handleSummaryClick}>Summary</button>
+          <button className="cal-button" >Save Plan</button>
+          <IconButton aria-label="delete" onClick={handleReset} >
+          <RestartAltIcon>
+          </RestartAltIcon>
+          </IconButton>
+        </div>
+        <h3>Click and drag recipes from below to add them to this plan</h3>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 body {
     background-color:#f4f4f5;
+    background-color: #ff7f50;
 }
 
 *{
@@ -310,8 +311,7 @@ body {
 
 .filter {
     display: flex;
-    align-items: center;
-    width: 260px;
+    align-items: center;    
     margin-bottom: 5px;
   }
 
@@ -335,5 +335,5 @@ body {
   }
   
   body.zoomed-out {
-    transform: scale(0.8); /* Adjust the scale factor as needed */
+    transform: scale(0.8);
   }
