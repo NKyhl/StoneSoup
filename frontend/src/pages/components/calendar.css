@@ -1,6 +1,7 @@
 .week-calendar {
     text-align: center;
     padding: 10px 30px;
+    background-color: rgb(231, 230, 230);
   }
   
   .calendar-header {
@@ -144,7 +145,6 @@
 
 .day-summary {
   flex: 1;
-  /* border: 1px solid #ccc; */
   padding: 10px;
   margin: 5px;
   box-sizing: border-box;
@@ -160,11 +160,21 @@
 }
 
 .total-summary {
-  flex: 1; /* Takes up 50% of the container */
-  padding: 20px; /* Adjust padding as needed */
+  flex: 1;
+  padding: 20px;
 }
 
 .ingredients {
-  flex: 2; /* Takes up 50% of the container */
-  padding: 20px; /* Adjust padding as needed */
+  flex: 2; 
+  padding: 20px;
+}
+
+.calendar-bottom {
+  display: flex;
+  justify-content: centers;
+  align-items: center;
+}
+
+.calendar-bottom h3 {
+  flex: 1;
 }

@@ -16,11 +16,11 @@ function Search({setDrag}){
     const [minProtein, setMinProtein] = useState("");
     const [maxProtein, setMaxProtein] = useState("");
 
-    const [recipes, setRecipes] = useState([{"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"}]);
+    const [recipes, setRecipes] = useState([{"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"}, {"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"},{"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"}, {"name": "Chicken Noodle Soup" , "category": "FOOD-CAT" , "url" : "https://example.com/", "img_url" : "https://www.thelifejolie.com/wp-content/uploads/2023/01/Hearty-Chicken-Noodle-Soup-Recipe-The-Life-Jolie-4.jpg"}]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const recipesPerPage = 10;
+    const recipesPerPage = 6;
     const indexOfLastRecipe = currentPage * recipesPerPage;
     const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
     const currentRecipes = recipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
@@ -31,7 +31,7 @@ function Search({setDrag}){
 
 
     const handleSearch = async (e) => {
-
+        e.preventDefault();
         setLoading(true);
         let data = {
             "search" : searchValue,
@@ -68,17 +68,17 @@ function Search({setDrag}){
         <>
         <div className="search-parent">
         <div className="search-container"> 
-            <div className="wrap">
-                <div className="search">
-                    <input type="text" className="searchTerm" placeholder="What are you looking for?" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
-                    <button type="submit" className="searchButton">
-                        <SearchIcon onClick={handleSearch}/>
-                    </button>
-                </div>
-            </div>
-        <div style={{ margin: "10px 150px 0 0"}}>
+                <form onSubmit={handleSearch} style={{ width: "100%"}}>
+                    <div className="search">
+                        <input type="text" className="searchTerm" placeholder="What are you looking for?" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
+                        <button type="submit" className="searchButton">
+                            <SearchIcon/>
+                        </button>
+                    </div>
+                </form>
+        <div className="filter-container">
         <div className="filter">
-                    <label htmlFor="calories">Calories: </label>
+                    <p>Between</p>
                     <input
                     type="text"
                     id="calories"
@@ -87,6 +87,7 @@ function Search({setDrag}){
                     value={minCal}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMinCal(value);}}
                     />
+                    <p>and</p>
                     <input
                     type="text"
                     name="calories"
@@ -94,9 +95,10 @@ function Search({setDrag}){
                     value={maxCal}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMaxCal(value);}}
                     />
+                    <p>calories</p>
                 </div>
                 <div className="filter">
-                    <label htmlFor="carbs">Carbs: </label>
+                    <p>Between</p>
                     <input
                     type="text"
                     id="carbs"
@@ -104,6 +106,7 @@ function Search({setDrag}){
                     value={minCarb}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMinCarb(value);}}
                     />
+                    <p>and</p>
                     <input
                     type="text"
                     name="carbs"
@@ -111,9 +114,10 @@ function Search({setDrag}){
                     value={maxCarb}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMaxCarb(value);}}
                     />
+                    <p>g carbs</p>
                 </div>
                 <div className="filter">
-                    <label htmlFor="fats">Fats: </label>
+                    <p>Between</p>
                     <input
                     type="text"
                     id="fats"
@@ -121,6 +125,7 @@ function Search({setDrag}){
                     value={minFat}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMinFat(value);}}
                     />
+                    <p>and</p>
                     <input
                     type="text"
                     name="fats"
@@ -128,9 +133,10 @@ function Search({setDrag}){
                     value={maxFat}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMaxFat(value);}}
                     />
+                    <p>g fat</p>
                 </div>
                 <div className="filter">
-                    <label htmlFor="protein">Protein: </label>
+                    <p>Between</p>
                     <input
                     type="text"
                     id="protein"
@@ -138,6 +144,7 @@ function Search({setDrag}){
                     value={minProtein}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMinProtein(value);}}
                     />
+                    <p>and</p>
                     <input
                     type="text"
                     name="protein"
@@ -145,11 +152,14 @@ function Search({setDrag}){
                     value={maxProtein}
                     onChange={(e) => {const value = e.target.value.replace(/\D/g, ""); setMaxProtein(value);}}
                     />
+                    <p>g protein</p>
                 </div>
             </div>
             </div>
-            <Recipes recipes={currentRecipes} loading={loading} setDrag={setDrag}></Recipes>
-            <Pagination count={Math.ceil(recipes.length / recipesPerPage)} onChange={handleChange} ></Pagination>
+            <div className="recipe-container">
+                <Recipes recipes={currentRecipes} loading={loading} setDrag={setDrag}></Recipes>
+                <Pagination count={Math.ceil(recipes.length / recipesPerPage)} onChange={handleChange} ></Pagination>
+            </div>
             </div>
         </>
     );
