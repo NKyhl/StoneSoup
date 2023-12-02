@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, make_response
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
+import random 
 
 app = Flask(__name__, static_folder="../frontend/build", static_url_path="/")
 app.config['MYSQL_HOST'] = 'localhost'
@@ -290,7 +291,87 @@ def search_name():
         return {'message': 'The database is not available'}, 400
 
 
+    recipes  = request.json.get("search")  ##need recipe id list
+    recipes = recipes.split()
+    inglist = []
+    
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith WHERE recipe_id = "
+    wherelist = []
+    recarglist = []
+    for rid in recipes:
+        wherelist.append("%s")
+        recarglist.append(rid)
+    
+    where = " OR recipe_id = ".join(wherelist)
+    query = query + where
+    print(query%tuple(recarglist))
+    curs = conn.cursor()
+    curs.execute(query, tuple(recarglist))
+    ing_id  = curs.fetchall()
+    curs.close()
    
+    print(ing_id) 
+    query = "Select ingredient_id, count(*) matches from MadeWith where ingredient_id = "
+    wherelist = []
+    ing_idlist = []
+    for ing in ing_id:
+        wherelist.append("%s")
+        ing_idlist.append(ing[0])
+    where = " OR ingredient_id = ".join(wherelist)
+    query = query + where
+    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
+    print(query%tuple(ing_idlist))
+    curs = conn.cursor()
+    curs.execute(query, tuple(ing_idlist))
+    ing_to_use = curs.fetchall()
+    inglist = []
+    for ing in ing_to_use:
+        inglist.append(ing[0])
+    print(inglist)   
+    goodrec = False
+    query = ''
+    while not goodrec:
+        args = []
+        for i in range(4):
+            new = False
+            while not new:
+                x = random.choice(inglist)
+                if x in args:
+                    new = False
+                else:
+                    args.append(x)
+                    new = True
+        
+        ingargs = tuple(args)
+        
+        query = "(SELECT recipe_id FROM MadeWith where ingredient_id = %s)" 
+        query =  query + 'a, ' + query + 'b, ' + query + 'c, ' + query + 'd '
+        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id AND c.recipe_id = d.recipe_id ) b "
+        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe r," + query + "where b.recipe_id = r.id"
+        print(ingargs)
+        print(query%ingargs)
+        curs = conn.cursor()
+        curs.execute(query, ingargs)
+        recs = curs.fetchall()
+        curs.close()
+        if len(recs) > 20 :
+            goodrec = True 
+    
+    recipes = []
+    for recipe in recs:
+        recipes.append({
+            'name': recipe[0],
+            'category': recipe[1],
+            'url': recipe[2],
+            'img_url': recipe[3]
+            })
+
+    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
+
+         
+        
+
+
     ing = request.json.get("ingredient")
     if ing:
 
@@ -470,51 +551,137 @@ def search_name():
         
 
 @app.route("/api/search/ingredient", methods=['POST'])
-def search_ingredient():
-    '''Search for Recipes by Ingredient'''
-    return {'message': 'Not implemented'}, 400
+def usr_recommend():
+    '''Recommendation System'''
+
+    if not request.json or 'search' not in request.json:
+        return {'message': 'application/json format required'}, 400
 
     conn = mysql.connection
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-    ingname = request.json("search_ingredient_string")
 
-    ingwords = name.split()
-
-    ingquerylist = []
-    ingwherelist = []
-    x = 0
-    ingargs = ()
-
-    if len(ingwords) > 1:
-        for word in words:
-            leta = chr(ord('a') + x)
-            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
-            ingquery = "("+ingquery+") ing"
-            ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
-            ingquerylist.append(ingquery)
-            x=x+1
-            ingargs = ingargs + (word,)
-        for i in range(1,x):
-            leta = chr(ord('a') + i-1)
-            letb = chr(ord('a') + i)
-            ingwherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
-        ingwhere = " AND ".join(ingwherelist)
-        ingquery = ",".join(ingquerylist)
-        ingquery = "(SELECT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
-
-    else:
-        ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
-        ingquery = "("+query+") ing"
-        ingquery = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
-    ingquery = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
+    recipes  = request.json.get("recipes") ##need recipe id list
+    inglist = []
     
-    cursor = conn.cursor()
-    cursor.execute((query), (args))
-    recipes = cursor.fetchall()
-    return "hgfsdj"
-            
+    query = "SELECT DISTINCT ingredient_id FROM MadeWidth WHERE recipe_id = %d"
+    wherelist = []
+    recarglist = []
+    for rid in recipes:
+        wherelist.append("%d")
+        recarglist.append(rid)
+    
+    where = "OR recipe_id = ".join(wherelist)
+    query = query + where
+    curs = conn.cursor()
+    curs.execute(query, tuple(recarglist))
+    ing_id  = curs.fetchall()
+    cur.close()
+    
+    query = "Select ingredient_id, count(*) from MadeWith where ingredient_id = %d"
+    wherelist = []
+    ing_idlist = []
+    for ing in ing_id:
+        wherelist.append("%d")
+        ing_idlist.append(ing)
+    where = "OR ingredient_id = ".join(wherelist)
+    query = query + where
+    query = 'SELECT * FROM (' + query + " Group by ingredient_id)a, Where a.count(*) > 10"
+    curs = conn.cursor()
+    curs.execute(query, tuple(ing_idlist))
+    ings_to_use = curs.fetchall()
+    print(ing_to_use)
+        
+    
+    
+     #GET CALORIE GOAL
+    calgoal = 2800
+    progoal = 80
+
+
+    Bcal_low = 0.25 * calgoal
+    Bcal_high = 0.30 * calgoal
+    Lcal_low = 0.35 * calgoal
+    Lcal_high = 0.40 *calgoal
+    Scal_low = 0.05 * calgoal
+    Scal_high = 0.10 * calgoal
+    Dcal_low = 0.25 * calgoal
+    Dcal_high = 0.30 *calgoal
+    
+
+    Bpro_low = 0.25 * progoal
+    Bpro_high = 0.30 * progoal
+    Lpro_low = 0.35 * progoal
+    Lpro_high = 0.40 *progoal
+    Spro_low = 0.05 * progoal
+    Spro_high = 0.10 * progoal
+    Dpro_low = 0.25 * progoal
+    Dpro_high = 0.30 *progoal
+
+    
+    test = list(recs[:])
+    print(len(recs))
+    x = 0
+    for rec in test: 
+        if rec[4] == None:
+            test.pop(x)
+            x = x+1
+            continue
+        print("val:",rec[4])
+        if rec[1] == "Breakfast":
+            if rec[4] < Bcal_low or rec[4] > Bcal_high:
+                test.pop(x)
+        elif rec[1] == "Lunch":
+            if rec[4] < Lcal_low or rec[4] > Lcal_high:
+                test.pop(x)
+
+        elif rec[1] == "Dinner":
+            if rec[4] < Dcal_low or rec[4] > Dcal_high:
+                ex = test.pop(x)
+                print(ex)
+
+        else:
+            if rec[4] < Scal_low or rec[4] > Scal_high:
+                test.pop(x)
+        x = x+1
+    #if len(test) > 0:
+    recs = test[:]
+
+    test = list(recs[:])
+    print(len(recs))
+    x = 0
+    for rec in test:
+        if rec[5] == None:
+            test.pop(x)
+            x = x+1
+            continue
+        print("val:", rec[5])
+        if rec[1] == "Breakfast":
+            if rec[5] < Bro_low or rec[5] > Bpro_high:
+                test.pop(x)
+        elif rec[1] == "Lunch":
+            if rec[5] < Lpro_low or rec[5] > Lpro_high:
+                test.pop(x)
+
+        elif rec[1] == "Dinner":
+            if rec[5] < Dpro_low or rec[5] > Dpro_high:
+                ex = test.pop(x)
+                print(ex)
+
+        else:
+            if rec[5] < Spro_low or rec[5] > Spro_high:
+                test.pop(x)
+        x = x+1
+   # if len(test) > 0:
+    recs = test[:]
+    print(len(recs))
+    print(recs)
+
+    
+     
+    return {'message': 'Not implemented'}, 400
+                
 
 
 if __name__ == '__main__':
