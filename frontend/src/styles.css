@@ -329,3 +329,11 @@ body {
     border-radius: 5px;
     width:76px;
   }
+
+  body {
+    transition: transform 0.5s ease;
+  }
+  
+  body.zoomed-out {
+    transform: scale(0.8); /* Adjust the scale factor as needed */
+  }

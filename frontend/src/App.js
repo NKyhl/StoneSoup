@@ -10,7 +10,7 @@ import Landing from './pages/Landing';
 
 function App() {
 
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState(1);
 
   return (  
     <Router>

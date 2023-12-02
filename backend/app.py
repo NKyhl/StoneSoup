@@ -617,7 +617,7 @@ def get_meal_plan():
 
     conn.commit()
     cursor.close()
-
+    
     result = {
         'user_id': user_id,
         'start_date': start_date
@@ -633,6 +633,46 @@ def get_meal_plan():
     result['sun_breakfast'], result['sun_lunch'], result['sun_dinner'], result['sun_extra'] = meals[24:28] if meals else default
 
     return result
+    
+@app.route("/api/get/ingredients", methods=['POST'])
+def get_ingredients():
+    '''Return ingredient information for a given recipe.'''
+
+  if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+
+
+    recipe_id = request.json.get("recipe_id")
+
+    if not recipe_id:
+        return {'message': 'recipe_id not included'}, 400
+
+    query = "SELECT i.name, quantity, quantity_type, style, optional FROM Ingredient i, MadeWith mw, Recipe r WHERE r.id = mw.recipe_id AND i.id = mw.ingredient_id AND mw.recipe_id = %s"
+    args = (recipe_id,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    results = cursor.fetchall()
+    cursor.close()
+
+    data = {'ingredients': []}
+    for result in results:
+        data['ingredients'].append(
+            {
+                'name': result[0],
+                'quantity': result[1],
+                'quantity_type': result[2],
+                'style': result[3],
+                'optional': result[4] 
+            }
+        )
+
+    return data
 
 if __name__ == '__main__':
     app.run(debug=True, port=5036, host='db8.cse.nd.edu')
