@@ -638,7 +638,7 @@ def get_meal_plan():
 def get_ingredients():
     '''Return ingredient information for a given recipe.'''
 
-  if not request.json:
+    if not request.json:
         return {'message': 'application/json format required'}, 400
 
     conn = mysql.connection
