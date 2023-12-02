@@ -8,6 +8,7 @@ function UserPage({ userData, setUserData }){
         <main className="user-main">
             <Profile userData={userData} setUserData={setUserData} ></Profile>
         </main>
+        <footer></footer>
         </>
     );
 }

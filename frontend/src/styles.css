@@ -337,3 +337,9 @@ body {
   body.zoomed-out {
     transform: scale(0.8); /* Adjust the scale factor as needed */
   }
+
+footer {
+    margin-top: 75px;
+    height: 50px;
+    background-color: #7f1d1d;
+}
