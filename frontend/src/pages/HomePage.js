@@ -8,43 +8,43 @@ function HomePage({ userData, setUserData }){
 
     const [drag, setDrag] = useState(false);
     const [weekPlan, setWeekplan] = useState({
-        Sunday: {
+        sunday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Monday: {
+        monday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Tuesday: {
+        tuesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Wednesday: {
+        wednesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Thursday: {
+        thursday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Friday: {
+        friday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Saturday: {
+        saturday: {
           breakfast: "",
           lunch: "",
           dinner: "",

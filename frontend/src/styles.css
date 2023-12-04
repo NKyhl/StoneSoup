@@ -1,6 +1,6 @@
 body {
     background-color:#f4f4f5;
-    background-color: #ff7f50;
+    /* background-color: #ff7f50; */
 }
 
 *{
@@ -149,7 +149,7 @@ body {
 .user-main {
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 48px;
+    gap: 30px;
 }
 
 .profile-bar {
@@ -336,4 +336,18 @@ body {
   
   body.zoomed-out {
     transform: scale(0.8);
+  }
+
+  .chart-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .little-chart-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
   }
