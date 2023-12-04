@@ -634,17 +634,21 @@ def get_meal_plan():
     result = {
         'user_id': user_id,
         'start_date': start_date,
-        'plan': {}
     }
 
+    if not meals:
+        result['plan'] = None
+        return result
+
+    result['plan'] = {}
     days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
 
     for i, day in enumerate(days):
         result['plan'][day] = {
-            'breakfast': meals[4*i+0],
-            'lunch':     meals[4*i+1],
-            'dinner':    meals[4*i+2],
-            'extra':     meals[4*i+3]
+            'breakfast': meals[4*i+0] if 4*i+0 < len(meals) else None,
+            'lunch':     meals[4*i+1] if 4*i+1 < len(meals) else None,
+            'dinner':    meals[4*i+2] if 4*i+2 < len(meals) else None,
+            'extra':     meals[4*i+3] if 4*i+3 < len(meals) else None
         }
 
     return result
