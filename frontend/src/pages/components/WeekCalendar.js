@@ -49,6 +49,25 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
     });
   }
 
+  const handleDragStart = (e, recipe) => {
+    setDrag(true);
+    e.dataTransfer.setData('text/plain', JSON.stringify(recipe));
+  }
+
+  const handleDragEnd = (e) => {
+    e.preventDefault();
+    setDrag(false);
+  }
+
+  const removeDay = (e, day, meal) => {
+    e.preventDefault();
+    setWeekPlan((prevWeekPlan) => {
+      const newWeekPlan = { ...prevWeekPlan };
+      newWeekPlan[day] = { ...newWeekPlan[day], [meal]: '' };
+      return newWeekPlan;
+    });
+  }
+
   const renderWeekDays = () => {
 
     const handleDragOver = (e) => {
