@@ -135,7 +135,7 @@ def validate_user(username='', email='', password=''):
         return response, 400
 
     # If valid, return user info as well
-    query = "SELECT name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
+    query = "SELECT id, name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
 
     if username:
         args = (username,)
@@ -149,7 +149,8 @@ def validate_user(username='', email='', password=''):
 
     user_info = cursor.fetchone()
     if user_info:
-        name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        id, name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        response['id'] = id
         response['name'] = name
         response['email'] = email
         response['password'] = password
