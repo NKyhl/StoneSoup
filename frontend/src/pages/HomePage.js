@@ -12,43 +12,43 @@ function HomePage({ userData, setUserData }){
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         monday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         tuesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         wednesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         thursday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         friday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
         saturday: {
           breakfast: "",
           lunch: "",
           dinner: "",
-          snack: "",
+          extra: "",
         },
       });
 
@@ -60,7 +60,7 @@ function HomePage({ userData, setUserData }){
             <h1 style={{ color: "white"}}>My Meal Plan</h1>
         </div>
         <main>
-            <WeekCalendar drag={drag} setDrag={setDrag} weekPlan={weekPlan} setWeekPlan={setWeekplan}></WeekCalendar>
+            <WeekCalendar userData={userData} drag={drag} setDrag={setDrag} weekPlan={weekPlan} setWeekPlan={setWeekplan}></WeekCalendar>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
                 <h1 style={{ color: "white"}}>Recommendations</h1>
             </div>
