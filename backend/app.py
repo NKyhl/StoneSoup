@@ -642,17 +642,66 @@ def get_meal_plan():
 
     result['plan'] = {}
     days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+    slots = ('breakfast', 'lunch', 'dinner', 'extra')
 
     for i, day in enumerate(days):
         result['plan'][day] = {
-            'breakfast': meals[4*i+0] if 4*i+0 < len(meals) else None,
-            'lunch':     meals[4*i+1] if 4*i+1 < len(meals) else None,
-            'dinner':    meals[4*i+2] if 4*i+2 < len(meals) else None,
-            'extra':     meals[4*i+3] if 4*i+3 < len(meals) else None
+            'breakfast': {'id': (meals[4*i+0] if 4*i+0 < len(meals) else None)},
+            'lunch':     {'id': (meals[4*i+1] if 4*i+1 < len(meals) else None)},
+            'dinner':    {'id': (meals[4*i+2] if 4*i+2 < len(meals) else None)},
+            'extra':     {'id': (meals[4*i+3] if 4*i+3 < len(meals) else None)}
         }
+
+    # Get meta-data for each recipe
+    for day in days:
+        for slot in slots:
+            # Avoid slots without a recipe
+            rid = result['plan'][day][slot]['id']
+            if rid is None:
+                continue
+
+            # Query DB for meta-data
+            recipe = get_recipe(rid)
+            
+            result['plan'][day][slot] = recipe
 
     return result
     
+def get_recipe(rid):
+    conn = mysql.connection
+    if not conn:
+        return None
+
+    query = """
+    SELECT id, name, category, yield, 
+        calories, protein, fat, carbs,
+        prep_time, cook_time, total_time,
+        img_url, url
+    FROM Recipe
+    WHERE id = %s
+    """
+    
+    cursor = conn.cursor()
+    cursor.execute(query, (rid,))
+
+    recipe = cursor.fetchone()
+
+    return {
+        'id':           recipe[0],
+        'name':         recipe[1],
+        'category':     recipe[2],
+        'yield':        recipe[3],
+        'calories':     recipe[4],
+        'protein':      recipe[5],
+        'fat':          recipe[6],
+        'carbs':        recipe[7],
+        'prep_time':    recipe[8],
+        'cook_time':    recipe[9],
+        'total_time':   recipe[10],
+        'img_url':      recipe[11],
+        'url':          recipe[12]
+    } if recipe and len(recipe) == 13 else None
+
 @app.route("/api/get/ingredients", methods=['POST'])
 def get_ingredients():
     '''Return ingredient information for a given recipe.'''
