@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./calendar.css";  
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import IconButton from '@mui/material/IconButton';
@@ -7,11 +7,47 @@ import FlipCard from './FlipCard';
 
 function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
 
+  const calcFirstStart = () => {
+    const startDate = new Date(currentDate);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+    return startDate.toDateString();
+  };
+
   const [renderSummary, setRenderSummary] = useState(false);
 
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [startDay, setStartDay] = useState(() => calcFirstStart());
 
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  useEffect(() => {
+    const startDate = new Date(currentDate);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+    setStartDay(startDate.toDateString());
+  }, [currentDate]);
+
+  useEffect(() => {
+    console.log(startDay);
+  }, [startDay]);
+
+  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+  const handleDragStart = (e, recipe) => {
+    setDrag(true);
+    e.dataTransfer.setData('text/plain', JSON.stringify(recipe));
+  }
+
+  const handleDragEnd = (e) => {
+    e.preventDefault();
+    setDrag(false);
+  }
+
+  const removeDay = (e, day, meal) => {
+    e.preventDefault();
+    setWeekPlan((prevWeekPlan) => {
+      const newWeekPlan = { ...prevWeekPlan };
+      newWeekPlan[day] = { ...newWeekPlan[day], [meal]: '' };
+      return newWeekPlan;
+    });
+  }
 
   const handleDragStart = (e, recipe) => {
     setDrag(true);
@@ -59,13 +95,17 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
     const startDate = new Date(currentDate);
     startDate.setDate(startDate.getDate() - startDate.getDay());
 
+    const capitalizeFirstLetter = (string) => {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+
     for (let i = 0; i < 7; i++) {
       const day = new Date(startDate);
       day.setDate(day.getDate() + i);
       days.push(
         <div key={i}>
           <div className="day">
-            <div className="day-name">{daysOfWeek[day.getDay()]}</div>
+            <div className="day-name">{capitalizeFirstLetter(daysOfWeek[day.getDay()])}</div>
             <div className="day-number">{day.getDate()}</div>
           </div>
           <div className='meals'>
@@ -106,6 +146,8 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
 
+    // setStartDay(startDate.toDateString());
+
     const startDateString = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const endDateString = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -114,43 +156,43 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
 
   const handleReset = () => {
     setWeekPlan({
-      Sunday: {
+      sunday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Monday: {
+      monday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Tuesday: {
+      tuesday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Wednesday: {
+      wednesday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Thursday: {
+      thursday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Friday: {
+      friday: {
         breakfast: "",
         lunch: "",
         dinner: "",
         snack: "",
       },
-      Saturday: {
+      saturday: {
         breakfast: "",
         lunch: "",
         dinner: "",
