@@ -460,11 +460,14 @@ def save_meal_plan():
 
     user_id = data.get("user_id")
     start_date = data.get("start_date")
+    plan = data.get("plan")
 
     if not user_id:
         return {'message': 'user_id required'}, 400
     if not start_date:
         return {'message': 'start_date required'}, 400
+    if not plan:
+        return {'message': 'plan required'}, 400
     
     # Validate start_date is of DATE type
     query = "SELECT WEEKOFYEAR(%s) IS NOT NULL"
@@ -497,17 +500,28 @@ def save_meal_plan():
 
     exists = cursor.fetchone()[0]
 
-    # Save meal plan
-    meals = [
-        data.get('mon_breakfast'), data.get('mon_lunch'), data.get('mon_dinner'), data.get('mon_extra'),
-        data.get('tue_breakfast'), data.get('tue_lunch'), data.get('tue_dinner'), data.get('tue_extra'),
-        data.get('wed_breakfast'), data.get('wed_lunch'), data.get('wed_dinner'), data.get('wed_extra'),
-        data.get('thu_breakfast'), data.get('thu_lunch'), data.get('thu_dinner'), data.get('thu_extra'),
-        data.get('fri_breakfast'), data.get('fri_lunch'), data.get('fri_dinner'), data.get('fri_extra'),
-        data.get('sat_breakfast'), data.get('sat_lunch'), data.get('sat_dinner'), data.get('sat_extra'),
-        data.get('sun_breakfast'), data.get('sun_lunch'), data.get('sun_dinner'), data.get('sun_extra'),
-    ]
+    # Format input information for query
+    mon = plan.get("monday")
+    tue = plan.get("tuesday")
+    wed = plan.get("wednesday")
+    thu = plan.get("thursday")
+    fri = plan.get("friday")
+    sat = plan.get("saturday")
+    sun = plan.get("sunday")
+
+    meals = []
+    for day in (mon, tue, wed, thu, fri, sat, sun):
+        if not day:
+            meals.extend((None, None, None, None))
+        else:
+            meals.extend((
+                day.get('breakfast'),
+                day.get('lunch'),
+                day.get('dinner'),
+                day.get('extra')
+            ))
     
+    # Update or insert meal plan
     if exists:
         query = """
         UPDATE SavedPlan
@@ -614,23 +628,23 @@ def get_meal_plan():
     cursor.execute(query, args)
 
     meals = cursor.fetchone()
-
-    conn.commit()
     cursor.close()
     
     result = {
         'user_id': user_id,
-        'start_date': start_date
+        'start_date': start_date,
+        'plan': {}
     }
 
-    default = (None, None, None, None)
-    result['mon_breakfast'], result['mon_lunch'], result['mon_dinner'], result['mon_extra'] = meals[0:4] if meals else default
-    result['tue_breakfast'], result['tue_lunch'], result['tue_dinner'], result['tue_extra'] = meals[4:8] if meals else default
-    result['wed_breakfast'], result['wed_lunch'], result['wed_dinner'], result['wed_extra'] = meals[8:12] if meals else default
-    result['thu_breakfast'], result['thu_lunch'], result['thu_dinner'], result['thu_extra'] = meals[12:16] if meals else default
-    result['fri_breakfast'], result['fri_lunch'], result['fri_dinner'], result['fri_extra'] = meals[16:20] if meals else default
-    result['sat_breakfast'], result['sat_lunch'], result['sat_dinner'], result['sat_extra'] = meals[20:24] if meals else default
-    result['sun_breakfast'], result['sun_lunch'], result['sun_dinner'], result['sun_extra'] = meals[24:28] if meals else default
+    days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+
+    for i, day in enumerate(days):
+        result['plan'][day] = {
+            'breakfast': meals[4*i+0],
+            'lunch':     meals[4*i+1],
+            'dinner':    meals[4*i+2],
+            'extra':     meals[4*i+3]
+        }
 
     return result
     
@@ -638,7 +652,7 @@ def get_meal_plan():
 def get_ingredients():
     '''Return ingredient information for a given recipe.'''
 
-  if not request.json:
+    if not request.json:
         return {'message': 'application/json format required'}, 400
 
     conn = mysql.connection
