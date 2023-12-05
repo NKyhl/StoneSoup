@@ -22,6 +22,7 @@ console.log(data);
           <p>Protein: {data["protein"]}g</p>
           <p>Fat: {data["fat"]}g</p>
           <p>Carbs: {data["carbs"]}g</p>
+          <a href={data["url"]} target="_blank" rel="noopener noreferrer">Link</a>
         </div>
       </div>
     </div>

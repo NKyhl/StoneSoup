@@ -72,7 +72,8 @@ function Search({setDrag}){
         <div className="search-container"> 
                 <form onSubmit={handleSearch} style={{ width: "100%"}}>
                     <div className="search">
-                        <input type="text" className="searchTerm" placeholder="What are you looking for?" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
+                        <input type="text" className="searchTerm" placeholder="Recipe Name" value={searchValue} onChange={(e) => setSearchValue(e.target.value)}/>
+                        <input type="text" className="searchTerm" placeholder="Ingredients" value={ingValue} onChange={(e) => setIngValue(e.target.value)}/>
                         <button type="submit" className="searchButton">
                             <SearchIcon/>
                         </button>
