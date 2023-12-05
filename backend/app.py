@@ -291,160 +291,6 @@ def search_name():
         return {'message': 'The database is not available'}, 400
 
 
-    recipes  = request.json.get("search")  ##need recipe id list
-    recipes = recipes.split()
-    inglist = []
-    
-    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
-    wherelist = []
-    recarglist = []
-    for rid in recipes:
-        wherelist.append("%s")
-        recarglist.append(rid)
-    
-    where = " OR recipe_id = ".join(wherelist)
-    query = query + where
-
-
-    curs = conn.cursor()
-    curs.execute(query, tuple(recarglist))
-    ing_id  = curs.fetchall()
-    curs.close()
-   
-
- 
-    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
-    wherelist = []
-    ing_idlist = []
-    for ing in ing_id:
-        wherelist.append("%s")
-        ing_idlist.append(ing[0])
-    where = " OR ingredient_id = ".join(wherelist)
-    query = query + where
-    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
-
-
-    curs = conn.cursor()
-    curs.execute(query, tuple(ing_idlist))
-    ing_to_use = curs.fetchall()
-    inglist = []
-    for ing in ing_to_use:
-        inglist.append(ing[0])
-
- 
-    goodrec = False
-    query = ''
-    while not goodrec:
-        args = []
-        for i in range(3):
-            new = False
-            while not new:
-                x = random.choice(inglist)
-                if x in args:
-                    new = False
-                else:
-                    args.append(x)
-                    new = True
-        
-        ingargs = tuple(args)
-        
-        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
-        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
-        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
-
-
-        curs = conn.cursor()
-        curs.execute(query, ingargs)
-        recs = curs.fetchall()
-        curs.close()
-        if len(recs) > 20 :
-            goodrec = True 
-     #GET CALORIE GOAL
-    calgoal = 2800
-    progoal = 80
-
-
-    Bcal_low = 0.25 * calgoal
-    Bcal_high = 0.30 * calgoal
-    Lcal_low = 0.35 * calgoal
-    Lcal_high = 0.40 *calgoal
-    Scal_low = 0.05 * calgoal
-    Scal_high = 0.10 * calgoal
-    Dcal_low = 0.25 * calgoal
-    Dcal_high = 0.30 *calgoal
-
-
-    Bpro_low = 0.25 * progoal
-    Bpro_high = 0.30 * progoal
-    Lpro_low = 0.35 * progoal
-    Lpro_high = 0.40 *progoal
-    Spro_low = 0.05 * progoal
-    Spro_high = 0.10 * progoal
-    Dpro_low = 0.25 * progoal
-    Dpro_high = 0.30 *progoal
-
-
-    test = []
-    for rec in recs:
-        if rec[4] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[4] < Bcal_low or rec[4] > Bcal_high:
-                continue
-        elif rec[1] == "Lunch":
-            if rec[4] < Lcal_low or rec[4] > Lcal_high:
-                continue
-
-        elif rec[1] == "Dinner":
-            if rec[4] < Dcal_low or rec[4] > Dcal_high:
-                continue
-
-        else:
-            if rec[4] < Scal_low or rec[4] > Scal_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
-
-    
-    test = []
-    for rec in recs:
-        if rec[5] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[5] < Bpro_low or rec[5] > Bpro_high:
-                continue
-        elif rec[1] == "Lunch":
-            if rec[5] < Lpro_low or rec[5] > Lpro_high:
-                continue
-
-        elif rec[1] == "Dinner":
-            if rec[5] < Dpro_low or rec[5] > Dpro_high:
-                continue
-
-        else:
-            if rec[5] < Spro_low or rec[5] > Spro_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
-    
-    recipes = []
-    for recipe in recs:
-        recipes.append({
-            'name': recipe[0],
-            'category': recipe[1],
-            'url': recipe[2],
-            'img_url': recipe[3]
-            })
-
-    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
-
-         
-        
-
-
     ing = request.json.get("ingredient")
     if ing:
 
@@ -635,39 +481,75 @@ def usr_recommend():
         return {'message': 'The database is not available'}, 400
 
 
-    recipes  = request.json.get("recipes") ##need recipe id list
+    recipes  = request.json.get("search")  ##need recipe id list
+    recipes = recipes.split()
     inglist = []
-    
-    query = "SELECT DISTINCT ingredient_id FROM MadeWidth WHERE recipe_id = %d"
+
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
     wherelist = []
     recarglist = []
     for rid in recipes:
-        wherelist.append("%d")
+        wherelist.append("%s")
         recarglist.append(rid)
-    
-    where = "OR recipe_id = ".join(wherelist)
+
+    where = " OR recipe_id = ".join(wherelist)
     query = query + where
+
+
     curs = conn.cursor()
     curs.execute(query, tuple(recarglist))
     ing_id  = curs.fetchall()
-    cur.close()
-    
-    query = "Select ingredient_id, count(*) from MadeWith where ingredient_id = %d"
+    curs.close()
+
+
+
+    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
     wherelist = []
     ing_idlist = []
     for ing in ing_id:
-        wherelist.append("%d")
-        ing_idlist.append(ing)
-    where = "OR ingredient_id = ".join(wherelist)
+        wherelist.append("%s")
+        ing_idlist.append(ing[0])
+    where = " OR ingredient_id = ".join(wherelist)
     query = query + where
-    query = 'SELECT * FROM (' + query + " Group by ingredient_id)a, Where a.count(*) > 10"
+    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
+
+
     curs = conn.cursor()
     curs.execute(query, tuple(ing_idlist))
-    ings_to_use = curs.fetchall()
-    print(ing_to_use)
-        
-    
-    
+    ing_to_use = curs.fetchall()
+    inglist = []
+    for ing in ing_to_use:
+        inglist.append(ing[0])
+
+
+    goodrec = False
+    query = ''
+    while not goodrec:
+        args = []
+        for i in range(3):
+            new = False
+            while not new:
+                x = random.choice(inglist)
+                if x in args:
+                    new = False
+                else:
+                    args.append(x)
+                    new = True
+
+        ingargs = tuple(args)
+
+        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)"
+        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
+        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
+        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+
+
+        curs = conn.cursor()
+        curs.execute(query, ingargs)
+        recs = curs.fetchall()
+        curs.close()
+        if len(recs) > 20 :
+            goodrec = True
      #GET CALORIE GOAL
     calgoal = 2800
     progoal = 80
@@ -681,7 +563,7 @@ def usr_recommend():
     Scal_high = 0.10 * calgoal
     Dcal_low = 0.25 * calgoal
     Dcal_high = 0.30 *calgoal
-    
+
 
     Bpro_low = 0.25 * progoal
     Bpro_high = 0.30 * progoal
@@ -692,69 +574,218 @@ def usr_recommend():
     Dpro_low = 0.25 * progoal
     Dpro_high = 0.30 *progoal
 
-    
-    test = list(recs[:])
-    print(len(recs))
-    x = 0
-    for rec in test: 
+
+    test = []
+    for rec in recs:
         if rec[4] == None:
-            test.pop(x)
-            x = x+1
             continue
-        print("val:",rec[4])
         if rec[1] == "Breakfast":
             if rec[4] < Bcal_low or rec[4] > Bcal_high:
-                test.pop(x)
+                continue
         elif rec[1] == "Lunch":
             if rec[4] < Lcal_low or rec[4] > Lcal_high:
-                test.pop(x)
+                continue
 
         elif rec[1] == "Dinner":
             if rec[4] < Dcal_low or rec[4] > Dcal_high:
-                ex = test.pop(x)
-                print(ex)
+                continue
 
         else:
             if rec[4] < Scal_low or rec[4] > Scal_high:
-                test.pop(x)
-        x = x+1
-    #if len(test) > 0:
-    recs = test[:]
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
 
-    test = list(recs[:])
-    print(len(recs))
-    x = 0
-    for rec in test:
+
+    test = []
+    for rec in recs:
         if rec[5] == None:
-            test.pop(x)
-            x = x+1
             continue
-        print("val:", rec[5])
         if rec[1] == "Breakfast":
-            if rec[5] < Bro_low or rec[5] > Bpro_high:
-                test.pop(x)
+            if rec[5] < Bpro_low or rec[5] > Bpro_high:
+                continue
         elif rec[1] == "Lunch":
             if rec[5] < Lpro_low or rec[5] > Lpro_high:
-                test.pop(x)
+                continue
 
         elif rec[1] == "Dinner":
             if rec[5] < Dpro_low or rec[5] > Dpro_high:
-                ex = test.pop(x)
-                print(ex)
+                continue
 
         else:
             if rec[5] < Spro_low or rec[5] > Spro_high:
-                test.pop(x)
-        x = x+1
-   # if len(test) > 0:
-    recs = test[:]
-    print(len(recs))
-    print(recs)
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
+
+    recipes = []
+    for recipe in recs:
+        recipes.append({
+            'name': recipe[0],
+            'category': recipe[1],
+            'url': recipe[2],
+            'img_url': recipe[3]
+            })
+
+    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
+                
+
+dummy :
+
+    recipes  = request.json.get("search")  ##need recipe id list
+    recipes = recipes.split()
+    inglist = []
+    
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
+    wherelist = []
+    recarglist = []
+    for rid in recipes:
+        wherelist.append("%s")
+        recarglist.append(rid)
+    
+    where = " OR recipe_id = ".join(wherelist)
+    query = query + where
+
+
+    curs = conn.cursor()
+    curs.execute(query, tuple(recarglist))
+    ing_id  = curs.fetchall()
+    curs.close()
+   
+
+ 
+    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
+    wherelist = []
+    ing_idlist = []
+    for ing in ing_id:
+        wherelist.append("%s")
+        ing_idlist.append(ing[0])
+    where = " OR ingredient_id = ".join(wherelist)
+    query = query + where
+    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
+
+
+    curs = conn.cursor()
+    curs.execute(query, tuple(ing_idlist))
+    ing_to_use = curs.fetchall()
+    inglist = []
+    for ing in ing_to_use:
+        inglist.append(ing[0])
+
+ 
+    goodrec = False
+    query = ''
+    while not goodrec:
+        args = []
+        for i in range(3):
+            new = False
+            while not new:
+                x = random.choice(inglist)
+                if x in args:
+                    new = False
+                else:
+                    args.append(x)
+                    new = True
+        
+        ingargs = tuple(args)
+        
+        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
+        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
+        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
+        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+
+
+        curs = conn.cursor()
+        curs.execute(query, ingargs)
+        recs = curs.fetchall()
+        curs.close()
+        if len(recs) > 20 :
+            goodrec = True 
+     #GET CALORIE GOAL
+    calgoal = 2800
+    progoal = 80
+
+
+    Bcal_low = 0.25 * calgoal
+    Bcal_high = 0.30 * calgoal
+    Lcal_low = 0.35 * calgoal
+    Lcal_high = 0.40 *calgoal
+    Scal_low = 0.05 * calgoal
+    Scal_high = 0.10 * calgoal
+    Dcal_low = 0.25 * calgoal
+    Dcal_high = 0.30 *calgoal
+
+
+    Bpro_low = 0.25 * progoal
+    Bpro_high = 0.30 * progoal
+    Lpro_low = 0.35 * progoal
+    Lpro_high = 0.40 *progoal
+    Spro_low = 0.05 * progoal
+    Spro_high = 0.10 * progoal
+    Dpro_low = 0.25 * progoal
+    Dpro_high = 0.30 *progoal
+
+
+    test = []
+    for rec in recs:
+        if rec[4] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[4] < Bcal_low or rec[4] > Bcal_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[4] < Lcal_low or rec[4] > Lcal_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[4] < Dcal_low or rec[4] > Dcal_high:
+                continue
+
+        else:
+            if rec[4] < Scal_low or rec[4] > Scal_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
 
     
-     
-    return {'message': 'Not implemented'}, 400
-                
+    test = []
+    for rec in recs:
+        if rec[5] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[5] < Bpro_low or rec[5] > Bpro_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[5] < Lpro_low or rec[5] > Lpro_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[5] < Dpro_low or rec[5] > Dpro_high:
+                continue
+
+        else:
+            if rec[5] < Spro_low or rec[5] > Spro_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
+    
+    recipes = []
+    for recipe in recs:
+        recipes.append({
+            'name': recipe[0],
+            'category': recipe[1],
+            'url': recipe[2],
+            'img_url': recipe[3]
+            })
+
+    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
+
+         
+        
 
 
 if __name__ == '__main__':
