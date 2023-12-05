@@ -430,7 +430,7 @@ def search_name():
         W = " AND ".join(where)
         query = query + W        
     if query:
-        fquery = "SELECT name, category, url, img_url FROM (" + query + ") name"
+        fquery = "SELECT id, name, category, yeild, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + query + ") name"
     else:
         fquery = ""
     if ing:
@@ -451,10 +451,19 @@ def search_name():
     recipes = []
     for recipe in recs:
         recipes.append({
-            'name': recipe[0],
-            'category': recipe[1],
-            'url': recipe[2],
-            'img_url': recipe[3]
+         'id':           recipe[0],
+        'name':         recipe[1],
+        'category':     recipe[2],
+        'yield':        recipe[3],
+        'calories':     recipe[4],
+        'protein':      recipe[5],
+        'fat':          recipe[6],
+        'carbs':        recipe[7],
+        'prep_time':    recipe[8],
+        'cook_time':    recipe[9],
+        'total_time':   recipe[10],
+        'img_url':      recipe[11],
+        'url':          recipe[12]
         })
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
@@ -529,7 +538,7 @@ def usr_recommend():
         query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
         query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
         query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+        query = "SELECT r.id, r.name, r.url, r.category, r.yeild,  r.calories, r.protein, r.fat, r.carbs, r.preptime, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
 
 
         curs = conn.cursor()
@@ -611,10 +620,19 @@ def usr_recommend():
     recipes = []
     for recipe in recs:
         recipes.append({
-            'name': recipe[0],
-            'category': recipe[1],
-            'url': recipe[2],
-            'img_url': recipe[3]
+        'id':           recipe[0],
+        'name':         recipe[1],
+        'category':     recipe[2],
+        'yield':        recipe[3],
+        'calories':     recipe[4],
+        'protein':      recipe[5],
+        'fat':          recipe[6],
+        'carbs':        recipe[7],
+        'prep_time':    recipe[8],
+        'cook_time':    recipe[9],
+        'total_time':   recipe[10],
+        'img_url':      recipe[11],
+        'url':          recipe[12]
             })
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
