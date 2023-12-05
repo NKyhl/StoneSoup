@@ -148,7 +148,7 @@ body {
 .user-main {
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 48px;
+    gap: 30px;
 }
 
 .profile-bar {
@@ -310,8 +310,7 @@ body {
 
 .filter {
     display: flex;
-    align-items: center;
-    width: 260px;
+    align-items: center;    
     margin-bottom: 5px;
   }
 
@@ -328,4 +327,26 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     width:76px;
+  }
+
+  body {
+    transition: transform 0.5s ease;
+  }
+  
+  body.zoomed-out {
+    transform: scale(0.8);
+  }
+
+  .chart-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .little-chart-container {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
   }

@@ -136,7 +136,7 @@ def validate_user(username='', email='', password=''):
         return response, 400
 
     # If valid, return user info as well
-    query = "SELECT name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
+    query = "SELECT id, name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
 
     if username:
         args = (username,)
@@ -150,7 +150,8 @@ def validate_user(username='', email='', password=''):
 
     user_info = cursor.fetchone()
     if user_info:
-        name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        id, name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id = user_info
+        response['id'] = id
         response['name'] = name
         response['email'] = email
         response['password'] = password
@@ -330,19 +331,6 @@ def search_name():
     
 
         ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
-        #a = tuple(ingargs)
-        #print(ingquery.format(*a)) 
-        #curs = conn.cursor()
-        #curs.execute(ingquery.format(*a))
-        #recs = curs.fetchall()
-        #ingrecipes = []
-        #for recipe in recs:
-         #   ingrecipes.append({
-          #      'name': recipe[0],
-          #      'category': recipe[1],
-          #      'url': recipe[2],
-          #      'img_url': recipe[3]
-          #  })
    
     name = request.json.get("search")
     if name.lower() == "stone":
@@ -469,7 +457,7 @@ def search_name():
 
         
 
-@app.route("/api/search/ingredient", methods=['POST'])
+@app.route("/api/recommend", methods=['POST'])
 def usr_recommend():
     '''Recommendation System'''
 
@@ -480,160 +468,6 @@ def usr_recommend():
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-
-    recipes  = request.json.get("search")  ##need recipe id list
-    recipes = recipes.split()
-    inglist = []
-
-    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
-    wherelist = []
-    recarglist = []
-    for rid in recipes:
-        wherelist.append("%s")
-        recarglist.append(rid)
-
-    where = " OR recipe_id = ".join(wherelist)
-    query = query + where
-
-
-    curs = conn.cursor()
-    curs.execute(query, tuple(recarglist))
-    ing_id  = curs.fetchall()
-    curs.close()
-
-
-
-    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
-    wherelist = []
-    ing_idlist = []
-    for ing in ing_id:
-        wherelist.append("%s")
-        ing_idlist.append(ing[0])
-    where = " OR ingredient_id = ".join(wherelist)
-    query = query + where
-    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
-
-
-    curs = conn.cursor()
-    curs.execute(query, tuple(ing_idlist))
-    ing_to_use = curs.fetchall()
-    inglist = []
-    for ing in ing_to_use:
-        inglist.append(ing[0])
-
-
-    goodrec = False
-    query = ''
-    while not goodrec:
-        args = []
-        for i in range(3):
-            new = False
-            while not new:
-                x = random.choice(inglist)
-                if x in args:
-                    new = False
-                else:
-                    args.append(x)
-                    new = True
-
-        ingargs = tuple(args)
-
-        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)"
-        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
-        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
-
-
-        curs = conn.cursor()
-        curs.execute(query, ingargs)
-        recs = curs.fetchall()
-        curs.close()
-        if len(recs) > 20 :
-            goodrec = True
-     #GET CALORIE GOAL
-    calgoal = 2800
-    progoal = 80
-
-
-    Bcal_low = 0.25 * calgoal
-    Bcal_high = 0.30 * calgoal
-    Lcal_low = 0.35 * calgoal
-    Lcal_high = 0.40 *calgoal
-    Scal_low = 0.05 * calgoal
-    Scal_high = 0.10 * calgoal
-    Dcal_low = 0.25 * calgoal
-    Dcal_high = 0.30 *calgoal
-
-
-    Bpro_low = 0.25 * progoal
-    Bpro_high = 0.30 * progoal
-    Lpro_low = 0.35 * progoal
-    Lpro_high = 0.40 *progoal
-    Spro_low = 0.05 * progoal
-    Spro_high = 0.10 * progoal
-    Dpro_low = 0.25 * progoal
-    Dpro_high = 0.30 *progoal
-
-
-    test = []
-    for rec in recs:
-        if rec[4] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[4] < Bcal_low or rec[4] > Bcal_high:
-                continue
-        elif rec[1] == "Lunch":
-            if rec[4] < Lcal_low or rec[4] > Lcal_high:
-                continue
-
-        elif rec[1] == "Dinner":
-            if rec[4] < Dcal_low or rec[4] > Dcal_high:
-                continue
-
-        else:
-            if rec[4] < Scal_low or rec[4] > Scal_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
-
-
-    test = []
-    for rec in recs:
-        if rec[5] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[5] < Bpro_low or rec[5] > Bpro_high:
-                continue
-        elif rec[1] == "Lunch":
-            if rec[5] < Lpro_low or rec[5] > Lpro_high:
-                continue
-
-        elif rec[1] == "Dinner":
-            if rec[5] < Dpro_low or rec[5] > Dpro_high:
-                continue
-
-        else:
-            if rec[5] < Spro_low or rec[5] > Spro_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
-
-    recipes = []
-    for recipe in recs:
-        recipes.append({
-            'name': recipe[0],
-            'category': recipe[1],
-            'url': recipe[2],
-            'img_url': recipe[3]
-            })
-
-    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
-                
-
-dummy :
-
     recipes  = request.json.get("search")  ##need recipe id list
     recipes = recipes.split()
     inglist = []
@@ -648,13 +482,10 @@ dummy :
     where = " OR recipe_id = ".join(wherelist)
     query = query + where
 
-
     curs = conn.cursor()
     curs.execute(query, tuple(recarglist))
     ing_id  = curs.fetchall()
     curs.close()
-   
-
  
     query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
     wherelist = []
@@ -783,10 +614,247 @@ dummy :
             })
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
+            
+@app.route('/api/save/meal-plan', methods=['POST'])
+def save_meal_plan():
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
 
-         
-        
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'the database is not available'}, 400
 
+    data = request.json
+
+    user_id = data.get("user_id")
+    start_date = data.get("start_date")
+    plan = data.get("plan")
+
+    if not user_id:
+        return {'message': 'user_id required'}, 400
+    if not start_date:
+        return {'message': 'start_date required'}, 400
+    if not plan:
+        return {'message': 'plan required'}, 400
+    
+    # Validate start_date is of DATE type
+    query = "SELECT WEEKOFYEAR(%s) IS NOT NULL"
+    args = (start_date,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'invalid start_date'}, 400
+    
+    # Validate that user_id exists
+    query = "SELECT COUNT(*) FROM User WHERE id = %s"
+    args = (user_id,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'user_id does not exist'}, 400
+    
+    # See if a meal plan exists
+    query = "SELECT COUNT(*) FROM SavedPlan WHERE user_id = %s and start_date = %s"
+    args = (user_id, start_date)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    exists = cursor.fetchone()[0]
+
+    # Format input information for query
+    mon = plan.get("monday")
+    tue = plan.get("tuesday")
+    wed = plan.get("wednesday")
+    thu = plan.get("thursday")
+    fri = plan.get("friday")
+    sat = plan.get("saturday")
+    sun = plan.get("sunday")
+
+    meals = []
+    for day in (mon, tue, wed, thu, fri, sat, sun):
+        if not day:
+            meals.extend((None, None, None, None))
+        else:
+            meals.extend((
+                day.get('breakfast'),
+                day.get('lunch'),
+                day.get('dinner'),
+                day.get('extra')
+            ))
+    
+    # Update or insert meal plan
+    if exists:
+        query = """
+        UPDATE SavedPlan
+        SET mon_breakfast = %s, mon_lunch = %s, mon_dinner = %s, mon_extra = %s, 
+            tue_breakfast = %s, tue_lunch = %s, tue_dinner = %s, tue_extra = %s,
+            wed_breakfast = %s, wed_lunch = %s, wed_dinner = %s, wed_extra = %s,
+            thu_breakfast = %s, thu_lunch = %s, thu_dinner = %s, thu_extra = %s,
+            fri_breakfast = %s, fri_lunch = %s, fri_dinner = %s, fri_extra = %s,
+            sat_breakfast = %s, sat_lunch = %s, sat_dinner = %s, sat_extra = %s,
+            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s
+        WHERE user_id = %s
+          AND start_date = %s
+        """
+        args = tuple(meals + [user_id, start_date])
+
+    else:
+        query = """
+        INSERT INTO SavedPlan (user_id, start_date, 
+            mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
+            tue_breakfast, tue_lunch, tue_dinner, tue_extra,
+            wed_breakfast, wed_lunch, wed_dinner, wed_extra,
+            thu_breakfast, thu_lunch, thu_dinner, thu_extra,
+            fri_breakfast, fri_lunch, fri_dinner, fri_extra,
+            sat_breakfast, sat_lunch, sat_dinner, sat_extra,
+            sun_breakfast, sun_lunch, sun_dinner, sun_extra
+        )
+        VALUES (
+            %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, %s
+        )
+        """
+        args = tuple([user_id, start_date] + meals)
+    
+    cursor.execute(query, args)
+
+    conn.commit()
+    cursor.close()
+
+    return {'message': 'Meal plan saved'}, 200
+
+@app.route('/api/get/meal-plan', methods=['POST'])
+def get_meal_plan():
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'the database is not available'}, 400
+
+    data = request.json
+
+    user_id = data.get("user_id")
+    start_date = data.get("start_date")
+
+    if not user_id:
+        return {'message': 'user_id required'}, 400
+    if not start_date:
+        return {'message': 'start_date required'}, 400
+    
+    # Validate start_date is of DATE type
+    query = "SELECT WEEKOFYEAR(%s) IS NOT NULL"
+    args = (start_date,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'invalid start_date'}, 400
+    
+    # Validate that user_id exists
+    query = "SELECT COUNT(*) FROM User WHERE id = %s"
+    args = (user_id,)
+
+    cursor.execute(query, args)
+
+    result = cursor.fetchone()[0]
+    if not result:
+        return {'message': 'user_id does not exist'}, 400
+
+    # Get meal plan
+    query = """
+    SELECT mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
+        tue_breakfast, tue_lunch, tue_dinner, tue_extra,
+        wed_breakfast, wed_lunch, wed_dinner, wed_extra,
+        thu_breakfast, thu_lunch, thu_dinner, thu_extra,
+        fri_breakfast, fri_lunch, fri_dinner, fri_extra,
+        sat_breakfast, sat_lunch, sat_dinner, sat_extra,
+        sun_breakfast, sun_lunch, sun_dinner, sun_extra
+    FROM SavedPlan
+    WHERE user_id = %s
+      AND start_date = %s
+    """
+
+    args = (user_id, start_date)
+    
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    meals = cursor.fetchone()
+    cursor.close()
+    
+    result = {
+        'user_id': user_id,
+        'start_date': start_date,
+        'plan': {}
+    }
+
+    days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+
+    for i, day in enumerate(days):
+        result['plan'][day] = {
+            'breakfast': meals[4*i+0],
+            'lunch':     meals[4*i+1],
+            'dinner':    meals[4*i+2],
+            'extra':     meals[4*i+3]
+        }
+
+    return result
+    
+@app.route("/api/get/ingredients", methods=['POST'])
+def get_ingredients():
+    '''Return ingredient information for a given recipe.'''
+
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+
+
+    recipe_id = request.json.get("recipe_id")
+
+    if not recipe_id:
+        return {'message': 'recipe_id not included'}, 400
+
+    query = "SELECT i.name, quantity, quantity_type, style, optional FROM Ingredient i, MadeWith mw, Recipe r WHERE r.id = mw.recipe_id AND i.id = mw.ingredient_id AND mw.recipe_id = %s"
+    args = (recipe_id,)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    results = cursor.fetchall()
+    cursor.close()
+
+    data = {'ingredients': []}
+    for result in results:
+        data['ingredients'].append(
+            {
+                'name': result[0],
+                'quantity': result[1],
+                'quantity_type': result[2],
+                'style': result[3],
+                'optional': result[4] 
+            }
+        )
+
+    return data
 
 if __name__ == '__main__':
     app.run(debug=True, port=5053, host='db8.cse.nd.edu')
