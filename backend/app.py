@@ -561,6 +561,7 @@ def usr_recommend():
 
     # Filter results by calorie goals
     if calgoal:
+        calgoal = float(progoal)
         Bcal_low = 0.25 * calgoal
         Bcal_high = 0.30 * calgoal
         Lcal_low = 0.35 * calgoal
@@ -593,6 +594,7 @@ def usr_recommend():
 
     # Filter results by Protein goals
     if progoal:
+        progoal = float(progoal)
         Bpro_low = 0.25 * progoal
         Bpro_high = 0.30 * progoal
         Lpro_low = 0.35 * progoal
@@ -914,17 +916,27 @@ def get_ingredients():
     if not recipe_id:
         return {'message': 'recipe_id not included'}, 400
 
-    query = "SELECT i.name, quantity, quantity_type, style, optional FROM Ingredient i, MadeWith mw, Recipe r WHERE r.id = mw.recipe_id AND i.id = mw.ingredient_id AND mw.recipe_id = %s"
-    args = (recipe_id,)
+    recipes  = request.json.get("search")  # list of recipe ids
+    recipes = recipes.split()
 
-    cursor = conn.cursor()
-    cursor.execute(query, args)
+    inglist = []
+    
+    # Get ingredients from given recipes
+    query = "SELECT DISTINCT name, quantity, quantity_type, style, optional FROM MadeWith WHERE recipe_id = "
+    wherelist = []
+    recarglist = []
+    for rid in recipes:
+        wherelist.append("%s")
+        recarglist.append(rid)
+    
+    where = " OR recipe_id = ".join(wherelist)
+    query = query + where
 
-    results = cursor.fetchall()
-    cursor.close()
-
-    data = {'ingredients': []}
-    for result in results:
+    curs = conn.cursor()
+    curs.execute(query, tuple(recarglist))
+    ing_id  = curs.fetchall()
+    data = []
+    for result in ing_id:
         data['ingredients'].append(
             {
                 'name': result[0],
@@ -938,5 +950,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
 
