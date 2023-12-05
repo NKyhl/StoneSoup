@@ -34,8 +34,8 @@ function Summary({renderSummary, setRenderSummary, weekPlan}){
                     <Tab label="Daily" />
                 </Tabs>
 
-                {tabValue === 1 && <WeekSummary />}
-                {tabValue === 0 && <TotalSummary />}
+                {tabValue === 1 && <WeekSummary weekPlan={weekPlan}/>}
+                {tabValue === 0 && <TotalSummary weekPlan={weekPlan}/>}
             </div>
         </div>
     ) : "";

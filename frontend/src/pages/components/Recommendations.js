@@ -3,13 +3,12 @@ import './recommendations.css';
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 
-function Recommendations({ setDrag }) {
+function Recommendations({ setDrag, weekPlan, userData }) {
 
-
+  console.log(userData);
 
     const responsive = {
         superLargeDesktop: {
-          // the naming can be any, depends on you.
           breakpoint: { max: 4000, min: 3000 },
           items: 5
         },
@@ -49,13 +48,26 @@ function Recommendations({ setDrag }) {
         setDrag(false);
       }
 
+    const [loading, setLoading] = useState(false);
+
     const getRecs = async () => {
+      setLoading(true);
+      let searchString = "";
+
+      for(const day in weekPlan){
+        for(const meal in weekPlan[day]){
+          if(weekPlan[day][meal]){
+            searchString += " " + weekPlan[day][meal]["id"].toString();
+          }
+        }
+      }
+
       const res = await fetch('/api/recommend', {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ search: "10 30 23"})
+        body: JSON.stringify({ search: searchString, cal_goal: userData["cal_goal"], protein_goal: userData["protein_goal"]})
     });
   
     if(!res.ok){
@@ -66,12 +78,16 @@ function Recommendations({ setDrag }) {
     console.log(res_json);
 
     setRecList(res_json["recipes"]);
+    setLoading(false);
+    }
 
+    if(loading){
+      return <h2>Loading...</h2>;
     }
 
 
     return (
-      <div> <button onClick={getRecs}>HELLO</button>
+      <>
         <div className="recommendations-container">
             <div className='recommendations-inside-container'>
             <Carousel 
@@ -99,7 +115,10 @@ function Recommendations({ setDrag }) {
        
             </div>
         </div>
-      </div>
+        <div style={{ display: "flex" , justifyContent: "center", height: "40px", alignItems: "center"}}>
+          <button className="cal-button" onClick={getRecs}>Refresh</button>
+        </div>
+      </>
     )
 }
 

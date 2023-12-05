@@ -560,6 +560,7 @@ def usr_recommend():
     curs.close()
 
 
+    progoal = float(progoal)
     Bpro_low = 0.25 * progoal
     Bpro_high = 0.30 * progoal
     Lpro_low = 0.35 * progoal
@@ -571,6 +572,7 @@ def usr_recommend():
 
     # Filter results by calorie goals
     if calgoal:
+        calgoal = float(progoal)
         Bcal_low = 0.25 * calgoal
         Bcal_high = 0.30 * calgoal
         Lcal_low = 0.35 * calgoal
@@ -940,5 +942,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
 

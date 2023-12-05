@@ -64,7 +64,7 @@ function HomePage({ userData, setUserData }){
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
                 <h1 style={{ color: "white"}}>Recommendations</h1>
             </div>
-            <Recommendations setDrag={setDrag}></Recommendations>
+            <Recommendations setDrag={setDrag} weekPlan={weekPlan} userData={userData}></Recommendations>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
                 <h1 style={{ color: "white"}}>Search For Meals</h1>
             </div>
