@@ -554,9 +554,10 @@ def usr_recommend():
 
         curs.execute(query, ingargs)
         rec = curs.fetchall()
-        curs.close()
 
         recs += tuple(r for r in rec if r not in recs)
+    
+    curs.close()
 
 
     Bpro_low = 0.25 * progoal
