@@ -5,6 +5,6 @@
 <p>Creators:</p>
 <ul>
   <li>Nolan Kyhl</li>
-  <li>Jonny D'Alonso</li>
+  <li>Jonny D'Alonzo</li>
   <li>Nick Palma</li>
 </ul>
