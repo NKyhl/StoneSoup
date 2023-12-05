@@ -817,22 +817,22 @@ def get_meal_plan():
 
     for i, day in enumerate(days):
         result['plan'][day] = {
-            'breakfast': {'id': (meals[4*i+0] if 4*i+0 < len(meals) else None)},
-            'lunch':     {'id': (meals[4*i+1] if 4*i+1 < len(meals) else None)},
-            'dinner':    {'id': (meals[4*i+2] if 4*i+2 < len(meals) else None)},
-            'extra':     {'id': (meals[4*i+3] if 4*i+3 < len(meals) else None)}
+            'breakfast': {'id': meals[4*i+0]} if 4*i+0 < len(meals) else None,
+            'lunch':     {'id': meals[4*i+1]} if 4*i+1 < len(meals) else None,
+            'dinner':    {'id': meals[4*i+2]} if 4*i+2 < len(meals) else None,
+            'extra':     {'id': meals[4*i+3]} if 4*i+3 < len(meals) else None
         }
 
     # Get meta-data for each recipe
     for day in days:
         for slot in slots:
             # Avoid slots without a recipe
-            rid = result['plan'][day][slot]['id']
-            if rid is None:
+            s = result['plan'][day][slot]
+            if s is None:
                 continue
 
             # Query DB for meta-data
-            recipe = get_recipe(rid)
+            recipe = get_recipe(s['id'])
             
             result['plan'][day][slot] = recipe
 
@@ -914,5 +914,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
 
