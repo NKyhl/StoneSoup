@@ -11,8 +11,12 @@ app.config['MYSQL_DB'] = 'nkyhl'
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 
+@app.route("/")
+def landing():
+    return app.send_static_file('index.html')
+
 @app.route("/home")
-def index():
+def home():
     return app.send_static_file('index.html')
 
 @app.route("/login")
