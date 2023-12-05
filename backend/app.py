@@ -559,16 +559,6 @@ def usr_recommend():
     
     curs.close()
 
-
-    Bpro_low = 0.25 * progoal
-    Bpro_high = 0.30 * progoal
-    Lpro_low = 0.35 * progoal
-    Lpro_high = 0.40 *progoal
-    Spro_low = 0.05 * progoal
-    Spro_high = 0.10 * progoal
-    Dpro_low = 0.25 * progoal
-    Dpro_high = 0.30 *progoal
-
     # Filter results by calorie goals
     if calgoal:
         Bcal_low = 0.25 * calgoal
@@ -602,7 +592,15 @@ def usr_recommend():
             recs = test[:]
 
     # Filter results by Protein goals
-    if not progoal:
+    if progoal:
+        Bpro_low = 0.25 * progoal
+        Bpro_high = 0.30 * progoal
+        Lpro_low = 0.35 * progoal
+        Lpro_high = 0.40 *progoal
+        Spro_low = 0.05 * progoal
+        Spro_high = 0.10 * progoal
+        Dpro_low = 0.25 * progoal
+        Dpro_high = 0.30 *progoal
         test = []
         for rec in recs:
             if rec[5] == None:
