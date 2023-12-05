@@ -295,7 +295,7 @@ def search_name():
     recipes = recipes.split()
     inglist = []
     
-    query = "SELECT DISTINCT ingredient_id FROM MadeWith WHERE recipe_id = "
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
     wherelist = []
     recarglist = []
     for rid in recipes:
@@ -304,14 +304,16 @@ def search_name():
     
     where = " OR recipe_id = ".join(wherelist)
     query = query + where
-    print(query%tuple(recarglist))
+
+
     curs = conn.cursor()
     curs.execute(query, tuple(recarglist))
     ing_id  = curs.fetchall()
     curs.close()
    
-    print(ing_id) 
-    query = "Select ingredient_id, count(*) matches from MadeWith where ingredient_id = "
+
+ 
+    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
     wherelist = []
     ing_idlist = []
     for ing in ing_id:
@@ -320,19 +322,21 @@ def search_name():
     where = " OR ingredient_id = ".join(wherelist)
     query = query + where
     query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
-    print(query%tuple(ing_idlist))
+
+
     curs = conn.cursor()
     curs.execute(query, tuple(ing_idlist))
     ing_to_use = curs.fetchall()
     inglist = []
     for ing in ing_to_use:
         inglist.append(ing[0])
-    print(inglist)   
+
+ 
     goodrec = False
     query = ''
     while not goodrec:
         args = []
-        for i in range(4):
+        for i in range(3):
             new = False
             while not new:
                 x = random.choice(inglist)
@@ -344,18 +348,87 @@ def search_name():
         
         ingargs = tuple(args)
         
-        query = "(SELECT recipe_id FROM MadeWith where ingredient_id = %s)" 
-        query =  query + 'a, ' + query + 'b, ' + query + 'c, ' + query + 'd '
-        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe r," + query + "where b.recipe_id = r.id"
-        print(ingargs)
-        print(query%ingargs)
+        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
+        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
+        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
+        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+
+
         curs = conn.cursor()
         curs.execute(query, ingargs)
         recs = curs.fetchall()
         curs.close()
         if len(recs) > 20 :
             goodrec = True 
+     #GET CALORIE GOAL
+    calgoal = 2800
+    progoal = 80
+
+
+    Bcal_low = 0.25 * calgoal
+    Bcal_high = 0.30 * calgoal
+    Lcal_low = 0.35 * calgoal
+    Lcal_high = 0.40 *calgoal
+    Scal_low = 0.05 * calgoal
+    Scal_high = 0.10 * calgoal
+    Dcal_low = 0.25 * calgoal
+    Dcal_high = 0.30 *calgoal
+
+
+    Bpro_low = 0.25 * progoal
+    Bpro_high = 0.30 * progoal
+    Lpro_low = 0.35 * progoal
+    Lpro_high = 0.40 *progoal
+    Spro_low = 0.05 * progoal
+    Spro_high = 0.10 * progoal
+    Dpro_low = 0.25 * progoal
+    Dpro_high = 0.30 *progoal
+
+
+    test = []
+    for rec in recs:
+        if rec[4] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[4] < Bcal_low or rec[4] > Bcal_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[4] < Lcal_low or rec[4] > Lcal_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[4] < Dcal_low or rec[4] > Dcal_high:
+                continue
+
+        else:
+            if rec[4] < Scal_low or rec[4] > Scal_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
+
+    
+    test = []
+    for rec in recs:
+        if rec[5] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[5] < Bpro_low or rec[5] > Bpro_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[5] < Lpro_low or rec[5] > Lpro_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[5] < Dpro_low or rec[5] > Dpro_high:
+                continue
+
+        else:
+            if rec[5] < Spro_low or rec[5] > Spro_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
     
     recipes = []
     for recipe in recs:
@@ -387,9 +460,9 @@ def search_name():
         if len(ingwords) > 1:
             for word in ingwords:
                 inglet.append(chr(ord('a') + x))
-                ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+                ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
                 ingquery = "("+ingquery+") ing"
-                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
+                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) {}")
                 ingquerylist.append(ingquery)
                 ingargs.append(word)
                 ingargs.append(inglet[x])
@@ -403,11 +476,11 @@ def search_name():
             ingquery = "(SELECT DISTINCT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
 
         else:
-            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+            ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
             ingquery = "("+ingquery+") ing"
-            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) id"
+            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) id"
             ingargs.append(ingwords[0])
-        ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
+        ingquery = "SELECT * FROM Recipe_new, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
 
         ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
@@ -467,7 +540,7 @@ def search_name():
     if len(words) > 1:
         for word in words:
             leta.append(chr(ord('a') + x))
-            querylist.append("(SELECT * FROM Recipe WHERE name LIKE '%{}%' ){}")
+            querylist.append("(SELECT * FROM Recipe_new WHERE name LIKE '%{}%' ){}")
             args.append(word)
             args.append(leta[x])
             x+=1
@@ -482,7 +555,7 @@ def search_name():
     elif len(words) == 1:
         word = name
         args.append(words[0])
-        query = "SELECT * FROM Recipe WHERE name like '%{}%' "
+        query = "SELECT * FROM Recipe_new WHERE name like '%{}%' "
     else: 
         query = ""
  
@@ -491,7 +564,7 @@ def search_name():
         if query:
             query = "SELECT * FROM (" +query+ ")rec WHERE "
         else:
-            query = "SELECT * FROM Recipe WHERE "
+            query = "SELECT * FROM Recipe_new WHERE "
         if mincal:
             where.append("calories > {}")
             args.append(mincal)
