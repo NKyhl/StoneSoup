@@ -70,6 +70,7 @@ function HomePage({ userData, setUserData }){
             </div>
             <Search setDrag={setDrag}></Search>
         </main>
+        <footer></footer>
         </>
     );
 }

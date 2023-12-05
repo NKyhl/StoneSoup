@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, make_response
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
+import random 
 
 app = Flask(__name__, static_folder="../frontend/build", static_url_path="/")
 app.config['MYSQL_HOST'] = 'localhost'
@@ -10,8 +11,12 @@ app.config['MYSQL_DB'] = 'nkyhl'
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)
 
+@app.route("/")
+def landing():
+    return app.send_static_file('index.html')
+
 @app.route("/home")
-def index():
+def home():
     return app.send_static_file('index.html')
 
 @app.route("/login")
@@ -291,21 +296,160 @@ def search_name():
         return {'message': 'The database is not available'}, 400
 
 
+    ing = request.json.get("ingredient")
+    if ing:
+
+
+        ingwords = ing.split()
+        inglet = []
+
+        ingquerylist = []
+        ingwherelist = []
+        x = 0
+        ingargs = []
+
+        if len(ingwords) > 1:
+            for word in ingwords:
+                inglet.append(chr(ord('a') + x))
+                ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
+                ingquery = "("+ingquery+") ing"
+                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) {}")
+                ingquerylist.append(ingquery)
+                ingargs.append(word)
+                ingargs.append(inglet[x])
+                x = x+1
+            for i in range(1,x):
+                leta = chr(ord('a') + i-1)
+                letb = chr(ord('a') + i)
+                ingwherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
+            ingwhere = " AND ".join(ingwherelist)
+            ingquery = ",".join(ingquerylist)
+            ingquery = "(SELECT DISTINCT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
+
+        else:
+            ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
+            ingquery = "("+ingquery+") ing"
+            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) id"
+            ingargs.append(ingwords[0])
+        ingquery = "SELECT * FROM Recipe_new, "+ingquery+" WHERE Recipe.id = id.recipe_id"
+    
+
+        ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
+   
     name = request.json.get("search")
-
-    if not name:
-        return {'message': 'Forbidden search'}, 400
-    
+    if name.lower() == "stone":
+        name = "%"
+ 
     name.replace('%', '\\%').replace('_', '\\_')
-
-    cursor = conn.cursor()
-    cursor.execute("SELECT name, category, url, img_url FROM Recipe WHERE name like '%{}%' LIMIT 100".format(name))
-    res = cursor.fetchall()
-    if not res:
-        return {'recipes': [], 'message': 'Error querying the database'}, 404
     
+    words = name.split()
+    mincal = request.json.get("minCal")
+    if mincal:
+        mincal = int(mincal)
+    maxcal = request.json.get("maxCal")
+    if maxcal:
+        maxcal = int(maxcal)
+    mincarb = request.json.get("minCarb")
+    if mincarb:
+        mincarb = int(mincarb)
+    maxcarb = request.json.get("maxCarb")
+    if maxcarb:
+        maxcarb = int(maxcarb)
+    minfat = request.json.get("minFat")
+    if minfat:
+        minfat = int(minfat)
+    maxfat = request.json.get("maxFat")
+    if maxfat:
+        maxfat = int(maxfat)
+    minpro = request.json.get("minProtein")
+    if minpro:
+        minpro = int(minpro)
+    maxpro = request.json.get("maxProtein")
+    if maxpro:
+        maxpro = int(maxpro)
+
+
+    querylist = []
+    wherelist = []
+    leta = []
+    letb = []
+    x=0
+    args = []
+    if len(words) > 1:
+        for word in words:
+            leta.append(chr(ord('a') + x))
+            querylist.append("(SELECT * FROM Recipe_new WHERE name LIKE '%{}%' ){}")
+            args.append(word)
+            args.append(leta[x])
+            x+=1
+        for i in range(1,x):
+            leta = chr(ord('a') + i-1)
+            letb = chr(ord('a') + i)
+            wherelist.append(f" {leta}.name = {letb}.name ")
+
+        query = "SELECT a.* FROM "+", ".join(querylist)+" WHERE"
+        where = " AND ".join(wherelist)
+        query = query + where
+    elif len(words) == 1:
+        word = name
+        args.append(words[0])
+        query = "SELECT * FROM Recipe_new WHERE name like '%{}%' "
+    else: 
+        query = ""
+ 
+    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
+        where = []
+        if query:
+            query = "SELECT * FROM (" +query+ ")rec WHERE "
+        else:
+            query = "SELECT * FROM Recipe_new WHERE "
+        if mincal:
+            where.append("calories > {}")
+            args.append(mincal)
+        if maxcal:
+            where.append("calories < {}")
+            args.append(maxcal)
+        if mincarb:
+            where.append("carbs > {}")
+            args.append(mincarb)
+        if maxcarb:
+            where.append("carbs < {}")
+            args.append(maxcarb)
+        if maxfat:
+            where.append("fat < {}")
+            args.append(maxfat)
+        if minfat:
+            where.append("fat > {}")
+            args.append(minfat)
+        if minpro:
+            where.append("protein > {}")
+            args.append(minpro)
+        if maxpro:
+            where.append("protein < {}")
+            args.append(maxpro)
+        W = " AND ".join(where)
+        query = query + W        
+    if query:
+        fquery = "SELECT name, category, url, img_url FROM (" + query + ") name"
+    else:
+        fquery = ""
+    if ing:
+        if fquery:
+            fquery = "SELECT DISTINCT * FROM " + "("+ ingquery+") ing"+ "," + "("+fquery+") name" + " WHERE ing.name = name.name "
+            args = ingargs + args
+        else:
+            fquery = ingquery
+            args = ingargs
+    a = tuple(args)
+    q = " LIMIT 100"
+    fquery+= q
+    print(fquery.format(*a)) 
+    curs = conn.cursor()
+    curs.execute(fquery.format(*a))
+    recs = curs.fetchall()
+    curs.close()
     recipes = []
-    for recipe in res:
+    for recipe in recs:
         recipes.append({
             'name': recipe[0],
             'category': recipe[1],
@@ -315,138 +459,165 @@ def search_name():
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
 
-    words = name.split()
-    mincal = request.json.get("minCal")
-    mincal = str(mincal)
-    maxcal = request.json.get("maxCal")
-    maxcal = str(maxcal)
-    mincarb = request.json.get("minCarb")
-    mincarb = str(mincarb)
-    maxcarb = request.json.get("maxCarb")
-    maxcarb = str(maxcarb)
-    minfat = request.json.get("minFat")
-    minfat = str(minfat)
-    maxfat = request.json.get("maxFat")
-    maxfat = str(maxfat)
-    minpro = request.json.get("minProtein")
-    minpro = str(minpro)
-    maxpro = request.json.get("maxProtein")
-    maxpro = str(maxpro)
-
-
-    querylist = []
-    wherelist = []
-    x=0
-    args = []
-    if len(words) > 1:
-        for word in words:
-            word = "%"+words+"%"
-            leta = chr(ord('a') + x)
-            querylist.append(f"(SELECT name FROM Recipe WHERE name LIKE '%s'){leta}")
-            x=x+1
-            args.append(word)
-        for i in range(1,x):
-            leta = chr(ord('a') + i-1)
-            letb = chr(ord('a') + i)
-            wherelist.append(f" {leta}.name = {letb}.name ")
-
-        query = "SELECT a.name FROM "+", ".join(querylist)+" WHERE"
-        where = " AND ".join(wherelist)
-        query = query + where
-    else:
-        args.append(words[0])
-        query = "SELECT * FROM Recipe WHERE name LIKE '%s' "
-    if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
-        where = []
-        query = "SELECT * FROM (" +query+ ")rec WHERE "
-        if mincal:
-            where.append("calories > %s")
-            args.append(mincal)
-        if maxcal:
-            where.append("calories < %s")
-            args.append(maxcal)
-        if mincarb:
-            where.append("carbs > %s")
-            args.append(mincarb)
-        if maxcarb:
-            where.append("carbs < %s")
-            args.append(maxcarb)
-        if maxfat:
-            where.append("fat < %s")
-            args.append(maxfat)
-        if minfat:
-            where.append("fat > %s")
-            args.append(minfat)
-        if minpro:
-            where.append("protein > %s")
-            args.append(minpro)
-        if maxpro:
-            where.append("protein < %s")
-            args.append(maxpro)
-        W = " AND ".join(where)
-        query = query + W +";"       
-    
-    print(query%tuple(args))
-    curs = conn.cursor()
-    curs.execute(query, tuple(args))
-    recs = curs.fetchall()
-    curs.close()
-    print(recs)
-    results = []
-    for recipe in recs:
-        recipecols = {}
-        recipecols = {'id':recipe[0], 'name':recipe[1], 'category':recipe[2], 'yield':recipe[3], 'calories':recipe[4], 'protein':recipe[5], 'fat':recipe[6], 'carbs':recipe[7], 'prep_time':recipe[8], 'cook_time':recipe[9], 'total_time':recipe[10], 'img_url':recipe[11], 'url':recipe[12]}
-        results.append(recipecols)
-    r = {'results':results}
-    print(r)
-    return r
         
 
-@app.route("/api/search/ingredient", methods=['POST'])
-def search_ingredient():
-    '''Search for Recipes by Ingredient'''
-    return {'message': 'Not implemented'}, 400
+@app.route("/api/recommend", methods=['POST'])
+def usr_recommend():
+    '''Recommendation System'''
+
+    if not request.json or 'search' not in request.json:
+        return {'message': 'application/json format required'}, 400
 
     conn = mysql.connection
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-    name = request.json("search_ingredient_string")
-
-    words = name.split()
-
-    querylist = []
-    wherelist = []
-    x = 0
-    args = ()
-
-    if len(words) > 1:
-        for word in words:
-            leta = chr(ord('a') + x)
-            query = ("SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%s( |$)\")")
-            query = "("+query+") ing"
-            query = ("(SELECT recipe_id FROM "+query+f", MadeWith m WHERE m.ingredient_id = ing.id) {leta}")
-            querylist.append(query)
-            x=x+1
-            args = args + (word,)
-        for i in range(1,x):
-            leta = chr(ord('a') + i-1)
-            letb = chr(ord('a') + i)
-            wherelist.append(f" {leta}.recipe_id = {letb}.recipe_id ")
-        where = " AND ".join(wherelist)
-        query = ",".join(querylist)
-        query = "(SELECT a.recipe_id FROM " + query + " WHERE " +where +") id"
-
-    else:
-        query = (f"SELECT id FROM Ingredient WHERE name REGEXP (\"(^| )%( |$)\")")
-        query = "("+query+") ing"
-        query = "(SELECT recipe_id FROM "+query+", MadeWith m WHERE m.ingredient_id = ing.id) "
-    query = "SELECT * FROM Recipe, "+query+" WHERE Recipe.id = id.recipe_id;"
+    recipes  = request.json.get("search")  ##need recipe id list
+    recipes = recipes.split()
+    inglist = []
     
-    cursor = conn.cursor()
-    cursor.execute((query), (args))
-    recipes = cursor.fetchall()
-    return "hgfsdj"
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
+    wherelist = []
+    recarglist = []
+    for rid in recipes:
+        wherelist.append("%s")
+        recarglist.append(rid)
+    
+    where = " OR recipe_id = ".join(wherelist)
+    query = query + where
+
+    curs = conn.cursor()
+    curs.execute(query, tuple(recarglist))
+    ing_id  = curs.fetchall()
+    curs.close()
+ 
+    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
+    wherelist = []
+    ing_idlist = []
+    for ing in ing_id:
+        wherelist.append("%s")
+        ing_idlist.append(ing[0])
+    where = " OR ingredient_id = ".join(wherelist)
+    query = query + where
+    query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
+
+
+    curs = conn.cursor()
+    curs.execute(query, tuple(ing_idlist))
+    ing_to_use = curs.fetchall()
+    inglist = []
+    for ing in ing_to_use:
+        inglist.append(ing[0])
+
+ 
+    goodrec = False
+    query = ''
+    while not goodrec:
+        args = []
+        for i in range(3):
+            new = False
+            while not new:
+                x = random.choice(inglist)
+                if x in args:
+                    new = False
+                else:
+                    args.append(x)
+                    new = True
+        
+        ingargs = tuple(args)
+        
+        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
+        query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
+        query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
+        query = "SELECT r.name, r.category, r.url, r.img_url, r.calories, r.protein, r.carbs  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+
+
+        curs = conn.cursor()
+        curs.execute(query, ingargs)
+        recs = curs.fetchall()
+        curs.close()
+        if len(recs) > 20 :
+            goodrec = True 
+     #GET CALORIE GOAL
+    calgoal = 2800
+    progoal = 80
+
+
+    Bcal_low = 0.25 * calgoal
+    Bcal_high = 0.30 * calgoal
+    Lcal_low = 0.35 * calgoal
+    Lcal_high = 0.40 *calgoal
+    Scal_low = 0.05 * calgoal
+    Scal_high = 0.10 * calgoal
+    Dcal_low = 0.25 * calgoal
+    Dcal_high = 0.30 *calgoal
+
+
+    Bpro_low = 0.25 * progoal
+    Bpro_high = 0.30 * progoal
+    Lpro_low = 0.35 * progoal
+    Lpro_high = 0.40 *progoal
+    Spro_low = 0.05 * progoal
+    Spro_high = 0.10 * progoal
+    Dpro_low = 0.25 * progoal
+    Dpro_high = 0.30 *progoal
+
+
+    test = []
+    for rec in recs:
+        if rec[4] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[4] < Bcal_low or rec[4] > Bcal_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[4] < Lcal_low or rec[4] > Lcal_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[4] < Dcal_low or rec[4] > Dcal_high:
+                continue
+
+        else:
+            if rec[4] < Scal_low or rec[4] > Scal_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
+
+    
+    test = []
+    for rec in recs:
+        if rec[5] == None:
+            continue
+        if rec[1] == "Breakfast":
+            if rec[5] < Bpro_low or rec[5] > Bpro_high:
+                continue
+        elif rec[1] == "Lunch":
+            if rec[5] < Lpro_low or rec[5] > Lpro_high:
+                continue
+
+        elif rec[1] == "Dinner":
+            if rec[5] < Dpro_low or rec[5] > Dpro_high:
+                continue
+
+        else:
+            if rec[5] < Spro_low or rec[5] > Spro_high:
+                continue
+        test.append(rec)
+    if len(test) > 3:
+        recs = test[:]
+    
+    recipes = []
+    for recipe in recs:
+        recipes.append({
+            'name': recipe[0],
+            'category': recipe[1],
+            'url': recipe[2],
+            'img_url': recipe[3]
+            })
+
+    return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
             
 @app.route('/api/save/meal-plan', methods=['POST'])
 def save_meal_plan():
@@ -634,21 +805,74 @@ def get_meal_plan():
     result = {
         'user_id': user_id,
         'start_date': start_date,
-        'plan': {}
     }
 
+    if not meals:
+        result['plan'] = None
+        return result
+
+    result['plan'] = {}
     days = ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')
+    slots = ('breakfast', 'lunch', 'dinner', 'extra')
 
     for i, day in enumerate(days):
         result['plan'][day] = {
-            'breakfast': meals[4*i+0],
-            'lunch':     meals[4*i+1],
-            'dinner':    meals[4*i+2],
-            'extra':     meals[4*i+3]
+            'breakfast': {'id': (meals[4*i+0] if 4*i+0 < len(meals) else None)},
+            'lunch':     {'id': (meals[4*i+1] if 4*i+1 < len(meals) else None)},
+            'dinner':    {'id': (meals[4*i+2] if 4*i+2 < len(meals) else None)},
+            'extra':     {'id': (meals[4*i+3] if 4*i+3 < len(meals) else None)}
         }
+
+    # Get meta-data for each recipe
+    for day in days:
+        for slot in slots:
+            # Avoid slots without a recipe
+            rid = result['plan'][day][slot]['id']
+            if rid is None:
+                continue
+
+            # Query DB for meta-data
+            recipe = get_recipe(rid)
+            
+            result['plan'][day][slot] = recipe
 
     return result
     
+def get_recipe(rid):
+    conn = mysql.connection
+    if not conn:
+        return None
+
+    query = """
+    SELECT id, name, category, yield, 
+        calories, protein, fat, carbs,
+        prep_time, cook_time, total_time,
+        img_url, url
+    FROM Recipe
+    WHERE id = %s
+    """
+    
+    cursor = conn.cursor()
+    cursor.execute(query, (rid,))
+
+    recipe = cursor.fetchone()
+
+    return {
+        'id':           recipe[0],
+        'name':         recipe[1],
+        'category':     recipe[2],
+        'yield':        recipe[3],
+        'calories':     recipe[4],
+        'protein':      recipe[5],
+        'fat':          recipe[6],
+        'carbs':        recipe[7],
+        'prep_time':    recipe[8],
+        'cook_time':    recipe[9],
+        'total_time':   recipe[10],
+        'img_url':      recipe[11],
+        'url':          recipe[12]
+    } if recipe and len(recipe) == 13 else None
+
 @app.route("/api/get/ingredients", methods=['POST'])
 def get_ingredients():
     '''Return ingredient information for a given recipe.'''
@@ -690,4 +914,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+
