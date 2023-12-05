@@ -1,5 +1,7 @@
 function Recipes({ recipes, loading, setDrag }){
 
+  console.log(recipes);
+
     if(loading){
         return <h2>Loading...</h2>
     }
@@ -29,7 +31,7 @@ function Recipes({ recipes, loading, setDrag }){
               onDrag={(e) => handleDrag(e)}
               onDragEnd={(e) => handleDragEnd(e)}>
               <img src={recipe.img_url} alt={recipe.name} draggable="false"/>
-              <h2>{recipe.name}</h2>
+              <h2 className="meal-card">{recipe.name}</h2>
               <p>{recipe.category}</p>
               <a href={recipe.url} target="_blank" rel="noopener noreferrer">
                 View Recipe

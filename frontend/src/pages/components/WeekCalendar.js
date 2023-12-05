@@ -8,9 +8,13 @@ import FlipCard from './FlipCard';
 function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
 
   const calcFirstStart = () => {
-    const startDate = new Date(currentDate);
+    const startDate = new Date();
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    return startDate.toISOString().slice(0, 10);
+    const year = startDate.getFullYear();
+    const month = (startDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = startDate.getDate().toString().padStart(2, '0');
+    const formattedSunday = `${year}-${month}-${day}`;
+    return formattedSunday;
   };
 
   const [renderSummary, setRenderSummary] = useState(false);
@@ -21,7 +25,11 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
   useEffect(() => {
     const startDate = new Date(currentDate);
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    setStartDay(startDate.toISOString().slice(0, 10));
+    const year = startDate.getFullYear();
+    const month = (startDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = startDate.getDate().toString().padStart(2, '0');
+    const formattedSunday = `${year}-${month}-${day}`;
+    setStartDay(formattedSunday);
   }, [currentDate]);
 
   useEffect( () => {
@@ -49,7 +57,12 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
 
   console.log(res_json);
 
-  setWeekPlan(res_json["plan"]);
+  if(res_json["plan"] == null){
+    handleReset();
+  }
+  else{
+    setWeekPlan(res_json["plan"]);
+  }
 
   }
 
