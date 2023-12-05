@@ -67,6 +67,7 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
   }
 
   fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDay, userData, setWeekPlan]);
 
   const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -168,8 +169,6 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
 
-    // setStartDay(startDate.toDateString());
-
     const startDateString = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     const endDateString = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -227,6 +226,44 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
     setRenderSummary(true);
   };
 
+  const savePlan = async () => {
+    const deepCopy = JSON.parse(JSON.stringify(weekPlan));
+
+    for(const day in weekPlan){
+      for(const meal in weekPlan[day]){
+        if(weekPlan[day][meal]){
+          deepCopy[day][meal] = weekPlan[day][meal]["id"];
+        }
+        else{
+          deepCopy[day][meal] = null;
+        }
+      }
+    }
+
+    const data = {
+      user_id: userData["id"],
+      start_date: startDay,
+      plan: deepCopy
+    }
+
+    console.log(deepCopy)
+    const res = await fetch('/api/save/meal-plan', {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+  });
+
+  if(!res.ok){
+      return;
+  }
+
+  const res_json = await res.json();
+
+  console.log(res_json);
+  }
+
   return (
     <div className="week-calendar">
       <Summary renderSummary={renderSummary} setRenderSummary={setRenderSummary} weekPlan={weekPlan}></Summary>
@@ -240,7 +277,7 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
         <h3>Click meals to show their information</h3>
         <div className='bottom-buttons'>
           <button className="cal-button" style={{ marginRight : "0"}} onClick={handleSummaryClick}>Summary</button>
-          <button className="cal-button" >Save Plan</button>
+          <button className="cal-button" onClick={savePlan} >Save Plan</button>
           <IconButton aria-label="delete" onClick={handleReset} >
           <RestartAltIcon>
           </RestartAltIcon>

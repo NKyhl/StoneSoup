@@ -1,4 +1,4 @@
-const WeekSummary = () => {
+const WeekSummary = ({ weekPlan }) => {
     // Sample data for each day
     const weekData = [
       { day: 'Monday', protein: 50, carbs: 30, fat: 15, calories: 500 },
