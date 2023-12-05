@@ -38,8 +38,8 @@ function Recommendations({ setDrag, weekPlan, userData }) {
       }
   
       const handleDrag = (e) => {
-        if(window.scrollY >= 50){
-          window.scrollBy(0, -2);
+        if(window.scrollY >= 100){
+          window.scrollBy(0, -5);
         }
       }
   
@@ -82,7 +82,18 @@ function Recommendations({ setDrag, weekPlan, userData }) {
     }
 
     if(loading){
-      return <h2>Loading...</h2>;
+      return (
+        <>
+        <div className="recommendations-container">
+            <div className='recommendations-inside-container' style={{display: "flex" , justifyContent: "center" , alignItems: "center"}}>
+                <h2>Loading...</h2>
+              </div>
+        </div>
+        <div style={{ display: "flex" , justifyContent: "center", height: "40px", alignItems: "center"}}>
+          <button className="cal-button" onClick={getRecs}>Refresh</button>
+        </div>
+      </>
+      );
     }
 
 

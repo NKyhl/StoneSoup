@@ -12,8 +12,8 @@ function Recipes({ recipes, loading, setDrag }){
     }
 
     const handleDrag = (e) => {
-      if(window.scrollY >= 50){
-        window.scrollBy(0, -2);
+      if(window.scrollY >= 100){
+        window.scrollBy(0, -5);
       }
     }
 

@@ -149,6 +149,9 @@
   margin: 5px;
   box-sizing: border-box;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .day-summary p{
@@ -162,6 +165,9 @@
 .total-summary {
   flex: 1;
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
 }
 
 .ingredients {

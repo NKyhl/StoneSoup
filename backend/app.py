@@ -913,18 +913,17 @@ def get_ingredients():
         return {'message': 'The database is not available'}, 400
 
 
-    recipe_id = request.json.get("recipe_id")
+    recipes = request.json.get("recipe_ids")
 
-    if not recipe_id:
+    if not recipes:
         return {'message': 'recipe_id not included'}, 400
 
-    recipes  = request.json.get("search")  # list of recipe ids
     recipes = recipes.split()
 
     inglist = []
     
     # Get ingredients from given recipes
-    query = "SELECT DISTINCT name, quantity, quantity_type, style, optional FROM MadeWith WHERE recipe_id = "
+    query = "SELECT DISTINCT ingredient_id, quantity, quantity_type, style, optional FROM MadeWith WHERE recipe_id = "
     wherelist = []
     recarglist = []
     for rid in recipes:
@@ -933,11 +932,13 @@ def get_ingredients():
     
     where = " OR recipe_id = ".join(wherelist)
     query = query + where
-
+    query = "Select i.name, m.quantity, m.quantity_type, m.style, m.optional From Ingredient i, (" + query + ") m WHERE i.id = m.ingredient_id"
     curs = conn.cursor()
     curs.execute(query, tuple(recarglist))
     ing_id  = curs.fetchall()
-    data = []
+    data = {
+        "ingredients": []
+    }
     for result in ing_id:
         data['ingredients'].append(
             {
