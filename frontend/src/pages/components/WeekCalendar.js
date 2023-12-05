@@ -141,7 +141,7 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
             <div draggable={weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["dinner"])}
               onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"dinner");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["dinner"]}></FlipCard> : ''}</div>
-            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["extra"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["snack"])}
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["extra"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["extra"])}
               onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"extra");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "extra")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["extra"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["extra"]}></FlipCard> : ''}</div>
           </div>
@@ -266,7 +266,7 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
 
   return (
     <div className="week-calendar">
-      <Summary renderSummary={renderSummary} setRenderSummary={setRenderSummary} weekPlan={weekPlan}></Summary>
+      <Summary renderSummary={renderSummary} setRenderSummary={setRenderSummary} weekPlan={weekPlan} userData={userData}></Summary>
       <div className="calendar-header">
         <button onClick={handlePreviousWeek} className='week-buttons'>Previous Week</button>
         <h3>{getWeekRange()}</h3>

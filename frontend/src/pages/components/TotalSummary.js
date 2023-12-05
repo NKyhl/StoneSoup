@@ -79,7 +79,7 @@ const TotalSummary = ( { weekPlan }) => {
             </div>
             <div className="ingredients">
                 <h2>Ingredients</h2>
-                <ul>
+                <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
                     {ingredientList.map((ingredient, index) => {
 
                     let displayString = "";

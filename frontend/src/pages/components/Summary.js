@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import WeekSummary from './WeekSummary';
 import TotalSummary from './TotalSummary';
 
-function Summary({renderSummary, setRenderSummary, weekPlan}){
+function Summary({renderSummary, setRenderSummary, weekPlan, userData}){
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -34,7 +34,7 @@ function Summary({renderSummary, setRenderSummary, weekPlan}){
                     <Tab label="Daily" />
                 </Tabs>
 
-                {tabValue === 1 && <WeekSummary weekPlan={weekPlan}/>}
+                {tabValue === 1 && <WeekSummary weekPlan={weekPlan} userData={userData}/>}
                 {tabValue === 0 && <TotalSummary weekPlan={weekPlan}/>}
             </div>
         </div>
