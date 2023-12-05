@@ -481,10 +481,20 @@ def usr_recommend():
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-    recipes  = request.json.get("search")  ##need recipe id list
+    recipes  = request.json.get("search")  # list of recipe ids
     recipes = recipes.split()
+
+    calgoal = request.json.get("cal_goal")
+    progoal = request.json.get("protein_goal")
+
+    if not recipes:
+        return {'message': "'search' required"}
+    if not calgoal and not progoal:
+        return {'message': 'cal_goal and protein_goal required'}
+
     inglist = []
     
+    # Get ingredients from given recipes
     query = "SELECT DISTINCT ingredient_id FROM MadeWith WHERE recipe_id = "
     wherelist = []
     recarglist = []
@@ -498,8 +508,8 @@ def usr_recommend():
     curs = conn.cursor()
     curs.execute(query, tuple(recarglist))
     ing_id  = curs.fetchall()
-    curs.close()
  
+    # Only consider ingredients that show up in more than 1 recipe
     query = "Select ingredient_id, count(*) matches from MadeWith where ingredient_id = "
     wherelist = []
     ing_idlist = []
@@ -510,8 +520,6 @@ def usr_recommend():
     query = query + where
     query = 'SELECT * FROM (' + query + " group by ingredient_id)a Where a.matches  > 1"
 
-
-    curs = conn.cursor()
     curs.execute(query, tuple(ing_idlist))
     ing_to_use = curs.fetchall()
     inglist = []
@@ -519,9 +527,14 @@ def usr_recommend():
         inglist.append(ing[0])
 
  
-    goodrec = False
+    # Find recommendations
     query = ''
-    while not goodrec:
+    recs = ()
+    run_count = 0
+    while run_count < 15 and len(recs) < 20:
+        run_count += 1
+
+        # Choose 3 random ingredients
         args = []
         for i in range(3):
             new = False
@@ -535,22 +548,17 @@ def usr_recommend():
         
         ingargs = tuple(args)
         
-        query = "(SELECT recipe_id FROM MadeWith where ingredient_id = %s)" 
+        query = "(SELECT recipe_id FROM MadeWith where ingredient_id = %s AND optional = 0)" 
         query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
         query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
         query = "SELECT r.id, r.name, r.category, r.yield,  r.calories, r.protein, r.fat, r.carbs, r.prep_time, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe r," + query + "where b.recipe_id = r.id"
 
 
-        curs = conn.cursor()
         curs.execute(query, ingargs)
-        recs = curs.fetchall()
+        rec = curs.fetchall()
         curs.close()
-        if len(recs) > 20 :
-            goodrec = True 
-     #GET CALORIE GOAL
-    calgoal = 2800
-    progoal = 80
 
+        recs += tuple(r for r in rec if r not in recs)
 
     Bcal_low = 0.25 * calgoal
     Bcal_high = 0.30 * calgoal
@@ -571,7 +579,7 @@ def usr_recommend():
     Dpro_low = 0.25 * progoal
     Dpro_high = 0.30 *progoal
 
-
+    # Filter results by calorie goals
     test = []
     for rec in recs:
         if rec[4] == None:
@@ -594,7 +602,7 @@ def usr_recommend():
     if len(test) > 3:
         recs = test[:]
 
-    
+    # Filter results by Protein goals
     test = []
     for rec in recs:
         if rec[5] == None:
@@ -634,7 +642,7 @@ def usr_recommend():
         'img_url':      recipe[11],
         'url':          recipe[12]
             })
-
+ 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
             
 @app.route('/api/save/meal-plan', methods=['POST'])
