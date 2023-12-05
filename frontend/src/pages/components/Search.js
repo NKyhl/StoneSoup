@@ -7,6 +7,7 @@ import { Pagination } from "@mui/material";
 function Search({setDrag}){
 
     const [searchValue, setSearchValue] = useState("");
+	const [ingValue, setIngValue] = useState("");
     const [minCal, setMinCal] = useState("");
     const [maxCal, setMaxCal] = useState("");
     const [minCarb, setMinCarb] = useState("");
@@ -35,6 +36,7 @@ function Search({setDrag}){
         setLoading(true);
         let data = {
             "search" : searchValue,
+			"ingredient" : ingValue,
             "minCal" : minCal,
             "maxCal" : maxCal,
             "minCarb" : minCarb,
