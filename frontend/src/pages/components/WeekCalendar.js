@@ -5,12 +5,12 @@ import IconButton from '@mui/material/IconButton';
 import Summary from './Summary';
 import FlipCard from './FlipCard';
 
-function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
+function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
 
   const calcFirstStart = () => {
     const startDate = new Date(currentDate);
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    return startDate.toDateString();
+    return startDate.toISOString().slice(0, 10);
   };
 
   const [renderSummary, setRenderSummary] = useState(false);
@@ -21,12 +21,40 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
   useEffect(() => {
     const startDate = new Date(currentDate);
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    setStartDay(startDate.toDateString());
+    setStartDay(startDate.toISOString().slice(0, 10));
   }, [currentDate]);
 
-  useEffect(() => {
+  useEffect( () => {
+    async function fetchData() {
     console.log(startDay);
-  }, [startDay]);
+    console.log(userData);
+    const data = {
+      user_id: userData["id"],
+      start_date: startDay
+    }
+
+    const res = await fetch('/api/get/meal-plan', {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+  });
+
+  if(!res.ok){
+      return;
+  }
+
+  const res_json = await res.json();
+
+  console.log(res_json);
+
+  setWeekPlan(res_json["plan"]);
+
+  }
+
+  fetchData();
+  }, [startDay, userData, setWeekPlan]);
 
   const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -99,9 +127,9 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
             <div draggable={weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["dinner"])}
               onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"dinner");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
       onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "dinner")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["dinner"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["dinner"]}></FlipCard> : ''}</div>
-            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["snack"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["snack"])}
-              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"snack");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
-      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "snack")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["snack"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["snack"]}></FlipCard> : ''}</div>
+            <div draggable={weekPlan[daysOfWeek[day.getDay()]]["extra"] ? true : false} onDragStart={(e) => handleDragStart(e, weekPlan[daysOfWeek[day.getDay()]]["snack"])}
+              onDragEnd={(e) => {handleDragEnd(e); removeDay(e, daysOfWeek[day.getDay()],"extra");}} className='meal' style={{ border: drag ? '2px solid orange' : ''}} onDragOver={handleDragOver}
+      onDrop={(e) => onDrop(e,daysOfWeek[day.getDay()], "extra")} onDragLeave={handleDragLeave}>{weekPlan[daysOfWeek[day.getDay()]]["extra"] ? <FlipCard data={weekPlan[daysOfWeek[day.getDay()]]["extra"]}></FlipCard> : ''}</div>
           </div>
         </div>
       );
@@ -141,43 +169,43 @@ function WeekCalendar({ drag, setDrag, weekPlan, setWeekPlan }) {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       monday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       tuesday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       wednesday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       thursday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       friday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
       saturday: {
         breakfast: "",
         lunch: "",
         dinner: "",
-        snack: "",
+        extra: "",
       },
     });
   }
