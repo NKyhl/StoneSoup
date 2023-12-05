@@ -311,9 +311,9 @@ def search_name():
         if len(ingwords) > 1:
             for word in ingwords:
                 inglet.append(chr(ord('a') + x))
-                ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
+                ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
                 ingquery = "("+ingquery+") ing"
-                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) {}")
+                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
                 ingquerylist.append(ingquery)
                 ingargs.append(word)
                 ingargs.append(inglet[x])
@@ -327,11 +327,11 @@ def search_name():
             ingquery = "(SELECT DISTINCT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
 
         else:
-            ingquery = ("SELECT id FROM Ingredient_new WHERE name LIKE '%{}%'")
+            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
             ingquery = "("+ingquery+") ing"
-            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith_new m WHERE m.ingredient_id = ing.id) id"
+            ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) id"
             ingargs.append(ingwords[0])
-        ingquery = "SELECT * FROM Recipe_new, "+ingquery+" WHERE Recipe.id = id.recipe_id"
+        ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
 
         ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
@@ -378,7 +378,7 @@ def search_name():
     if len(words) > 1:
         for word in words:
             leta.append(chr(ord('a') + x))
-            querylist.append("(SELECT * FROM Recipe_new WHERE name LIKE '%{}%' ){}")
+            querylist.append("(SELECT * FROM Recipe WHERE name LIKE '%{}%' ){}")
             args.append(word)
             args.append(leta[x])
             x+=1
@@ -393,7 +393,7 @@ def search_name():
     elif len(words) == 1:
         word = name
         args.append(words[0])
-        query = "SELECT * FROM Recipe_new WHERE name like '%{}%' "
+        query = "SELECT * FROM Recipe WHERE name like '%{}%' "
     else: 
         query = ""
  
@@ -402,7 +402,7 @@ def search_name():
         if query:
             query = "SELECT * FROM (" +query+ ")rec WHERE "
         else:
-            query = "SELECT * FROM Recipe_new WHERE "
+            query = "SELECT * FROM Recipe WHERE "
         if mincal:
             where.append("calories > {}")
             args.append(mincal)
@@ -485,7 +485,7 @@ def usr_recommend():
     recipes = recipes.split()
     inglist = []
     
-    query = "SELECT DISTINCT ingredient_id FROM MadeWith_new WHERE recipe_id = "
+    query = "SELECT DISTINCT ingredient_id FROM MadeWith WHERE recipe_id = "
     wherelist = []
     recarglist = []
     for rid in recipes:
@@ -500,7 +500,7 @@ def usr_recommend():
     ing_id  = curs.fetchall()
     curs.close()
  
-    query = "Select ingredient_id, count(*) matches from MadeWith_new where ingredient_id = "
+    query = "Select ingredient_id, count(*) matches from MadeWith where ingredient_id = "
     wherelist = []
     ing_idlist = []
     for ing in ing_id:
@@ -535,10 +535,10 @@ def usr_recommend():
         
         ingargs = tuple(args)
         
-        query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
+        query = "(SELECT recipe_id FROM MadeWith where ingredient_id = %s)" 
         query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
         query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.id, r.name, r.category, r.yield,  r.calories, r.protein, r.fat, r.carbs, r.prep_time, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+        query = "SELECT r.id, r.name, r.category, r.yield,  r.calories, r.protein, r.fat, r.carbs, r.prep_time, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe r," + query + "where b.recipe_id = r.id"
 
 
         curs = conn.cursor()
