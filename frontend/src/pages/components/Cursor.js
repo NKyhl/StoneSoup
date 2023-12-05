@@ -17,8 +17,8 @@ const Cursor = () => {
       }}
     >
       <svg
-        width={50}
-        height={50}
+        width={200}
+        height={200}
         viewBox="0 0 50 50"
         style={{
           position: "absolute",
@@ -26,7 +26,7 @@ const Cursor = () => {
           top: clientY,
           transform: "translate(-50%, -50%)",
         }}
-        fill={'#E07637'}
+        fill={'#6C6C6C'}
       >
         <circle
           cx="25"
