@@ -2,6 +2,8 @@ import { useState } from 'react';
 import './FlipCard.css';
 
 function FlipCard({ data }){
+console.log(data);
+
   const [isFlipped, setFlipped] = useState(false);
   const flipCard = () => {
     setFlipped(!isFlipped);
@@ -16,10 +18,10 @@ function FlipCard({ data }){
         </div>
         <div className="flip-card-back">
           <h3>Food Information</h3>
-          <p>Calories: XXX</p>
-          <p>Protein: XXg</p>
-          <p>Fat: XXg</p>
-          <p>Carbs: XXg</p>
+          <p>Calories: {data["calories"]}</p>
+          <p>Protein: {data["protein"]}g</p>
+          <p>Fat: {data["fat"]}g</p>
+          <p>Carbs: {data["carbs"]}g</p>
         </div>
       </div>
     </div>

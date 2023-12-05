@@ -356,3 +356,13 @@ footer {
     flex-direction: row;
     gap: 30px;
   }
+
+  .meal-card {
+    overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  min-height: 2.4em;
+  max-height: 4.8em;
+  }

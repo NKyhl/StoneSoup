@@ -430,7 +430,7 @@ def search_name():
         W = " AND ".join(where)
         query = query + W        
     if query:
-        fquery = "SELECT id, name, category, yeild, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + query + ") name"
+        fquery = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + query + ") name"
     else:
         fquery = ""
     if ing:
@@ -538,7 +538,7 @@ def usr_recommend():
         query = "(SELECT recipe_id FROM MadeWith_new where ingredient_id = %s)" 
         query =  query + 'a, ' + query + 'b, ' + query + 'c ' #+ query + 'd '
         query = "(Select Distinct a.recipe_id FROM " + query + "where a.recipe_id = b.recipe_id AND b.recipe_id = c.recipe_id) b " #AND c.recipe_id = d.recipe_id ) b "
-        query = "SELECT r.id, r.name, r.url, r.category, r.yeild,  r.calories, r.protein, r.fat, r.carbs, r.preptime, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
+        query = "SELECT r.id, r.name, r.category, r.yield,  r.calories, r.protein, r.fat, r.carbs, r.prep_time, r.cook_time, r.total_time, r.img_url, r.url  FROM Recipe_new r," + query + "where b.recipe_id = r.id"
 
 
         curs = conn.cursor()

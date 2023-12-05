@@ -5,6 +5,8 @@ import "react-multi-carousel/lib/styles.css";
 
 function Recommendations({ setDrag }) {
 
+
+
     const responsive = {
         superLargeDesktop: {
           // the naming can be any, depends on you.
@@ -47,8 +49,29 @@ function Recommendations({ setDrag }) {
         setDrag(false);
       }
 
+    const getRecs = async () => {
+      const res = await fetch('/api/recommend', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ search: "10 30 23"})
+    });
+  
+    if(!res.ok){
+        return;
+    }
+  
+    const res_json = await res.json();
+    console.log(res_json);
+
+    setRecList(res_json["recipes"]);
+
+    }
+
 
     return (
+      <div> <button onClick={getRecs}>HELLO</button>
         <div className="recommendations-container">
             <div className='recommendations-inside-container'>
             <Carousel 
@@ -65,7 +88,7 @@ function Recommendations({ setDrag }) {
                             onDrag={(e) => handleDrag(e)}
                             onDragEnd={(e) => handleDragEnd(e)}>
                             <img src={recipe.img_url} alt={recipe.name} draggable="false"/>
-                            <h2>{recipe.name}</h2>
+                            <h2 className='meal-card'>{recipe.name}</h2>
                             <p>{recipe.category}</p>
                             <a href={recipe.url} target="_blank" rel="noopener noreferrer">
                                 View Recipe
@@ -76,6 +99,7 @@ function Recommendations({ setDrag }) {
        
             </div>
         </div>
+      </div>
     )
 }
 
