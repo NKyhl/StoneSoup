@@ -489,8 +489,6 @@ def usr_recommend():
 
     if not recipes:
         return {'message': "'search' required"}
-    if not calgoal and not progoal:
-        return {'message': 'cal_goal and protein_goal required'}
 
     inglist = []
     
@@ -560,15 +558,6 @@ def usr_recommend():
 
         recs += tuple(r for r in rec if r not in recs)
 
-    Bcal_low = 0.25 * calgoal
-    Bcal_high = 0.30 * calgoal
-    Lcal_low = 0.35 * calgoal
-    Lcal_high = 0.40 *calgoal
-    Scal_low = 0.05 * calgoal
-    Scal_high = 0.10 * calgoal
-    Dcal_low = 0.25 * calgoal
-    Dcal_high = 0.30 *calgoal
-
 
     Bpro_low = 0.25 * progoal
     Bpro_high = 0.30 * progoal
@@ -580,50 +569,60 @@ def usr_recommend():
     Dpro_high = 0.30 *progoal
 
     # Filter results by calorie goals
-    test = []
-    for rec in recs:
-        if rec[4] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[4] < Bcal_low or rec[4] > Bcal_high:
+    if calgoal:
+        Bcal_low = 0.25 * calgoal
+        Bcal_high = 0.30 * calgoal
+        Lcal_low = 0.35 * calgoal
+        Lcal_high = 0.40 *calgoal
+        Scal_low = 0.05 * calgoal
+        Scal_high = 0.10 * calgoal
+        Dcal_low = 0.25 * calgoal
+        Dcal_high = 0.30 *calgoal
+        test = []
+        for rec in recs:
+            if rec[4] == None:
                 continue
-        elif rec[1] == "Lunch":
-            if rec[4] < Lcal_low or rec[4] > Lcal_high:
-                continue
+            if rec[1] == "Breakfast":
+                if rec[4] < Bcal_low or rec[4] > Bcal_high:
+                    continue
+            elif rec[1] == "Lunch":
+                if rec[4] < Lcal_low or rec[4] > Lcal_high:
+                    continue
 
-        elif rec[1] == "Dinner":
-            if rec[4] < Dcal_low or rec[4] > Dcal_high:
-                continue
+            elif rec[1] == "Dinner":
+                if rec[4] < Dcal_low or rec[4] > Dcal_high:
+                    continue
 
-        else:
-            if rec[4] < Scal_low or rec[4] > Scal_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
+            else:
+                if rec[4] < Scal_low or rec[4] > Scal_high:
+                    continue
+            test.append(rec)
+        if len(test) > 3:
+            recs = test[:]
 
     # Filter results by Protein goals
-    test = []
-    for rec in recs:
-        if rec[5] == None:
-            continue
-        if rec[1] == "Breakfast":
-            if rec[5] < Bpro_low or rec[5] > Bpro_high:
+    if not progoal:
+        test = []
+        for rec in recs:
+            if rec[5] == None:
                 continue
-        elif rec[1] == "Lunch":
-            if rec[5] < Lpro_low or rec[5] > Lpro_high:
-                continue
+            if rec[1] == "Breakfast":
+                if rec[5] < Bpro_low or rec[5] > Bpro_high:
+                    continue
+            elif rec[1] == "Lunch":
+                if rec[5] < Lpro_low or rec[5] > Lpro_high:
+                    continue
 
-        elif rec[1] == "Dinner":
-            if rec[5] < Dpro_low or rec[5] > Dpro_high:
-                continue
+            elif rec[1] == "Dinner":
+                if rec[5] < Dpro_low or rec[5] > Dpro_high:
+                    continue
 
-        else:
-            if rec[5] < Spro_low or rec[5] > Spro_high:
-                continue
-        test.append(rec)
-    if len(test) > 3:
-        recs = test[:]
+            else:
+                if rec[5] < Spro_low or rec[5] > Spro_high:
+                    continue
+            test.append(rec)
+        if len(test) > 3:
+            recs = test[:]
     
     recipes = []
     for recipe in recs:
