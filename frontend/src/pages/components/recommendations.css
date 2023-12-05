@@ -1,0 +1,26 @@
+.recommendations-container {
+    width: 100%;
+    height: 400px;
+    padding: 15px;
+    justify-content: center;
+    display: flex;
+}
+
+.recommendations-inside-container {
+    width: 100%;
+    border: 1px solid grey;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(180deg, rgb(251, 180, 56), rgb(249, 179, 110));
+}
+
+.car-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.carousel {
+    padding: 0px;
+    margin-top: 50px;
+}

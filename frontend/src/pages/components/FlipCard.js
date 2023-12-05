@@ -8,10 +8,10 @@ function FlipCard({ data }){
   };
 
   return (
-    <div className={`flip-card${isFlipped ? ' flipped' : ''}`} onClick={flipCard}>
+    <div draggable="false" className={`flip-card${isFlipped ? ' flipped' : ''}`} onClick={flipCard}>
       <div className="flip-card-inner">
         <div className="flip-card-front">
-          <img className="flip-card-image" src={data["img_url"]} alt={data["name"]} style={{ width: '100%', height: '200px' }} />
+          <img draggable="true" className="flip-card-image" src={data["img_url"]} alt={data["name"]} style={{ width: '100%', height: '200px' }} />
         <h3>{data["name"]}</h3>
         </div>
         <div className="flip-card-back">
@@ -20,7 +20,6 @@ function FlipCard({ data }){
           <p>Protein: XXg</p>
           <p>Fat: XXg</p>
           <p>Carbs: XXg</p>
-          <button onClick={flipCard}>Go Back</button>
         </div>
       </div>
     </div>

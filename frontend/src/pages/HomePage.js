@@ -2,48 +2,49 @@ import { useState } from "react";
 import Header from "./components/Header";
 import Search from "./components/Search";
 import WeekCalendar from "./components/WeekCalendar";
+import Recommendations from "./components/Recommendations";
 
 function HomePage({ userData, setUserData }){
 
     const [drag, setDrag] = useState(false);
     const [weekPlan, setWeekplan] = useState({
-        Sunday: {
+        sunday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Monday: {
+        monday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Tuesday: {
+        tuesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Wednesday: {
+        wednesday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Thursday: {
+        thursday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Friday: {
+        friday: {
           breakfast: "",
           lunch: "",
           dinner: "",
           snack: "",
         },
-        Saturday: {
+        saturday: {
           breakfast: "",
           lunch: "",
           dinner: "",
@@ -54,14 +55,18 @@ function HomePage({ userData, setUserData }){
     return (
         <>
         <Header userData={userData} ></Header>
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
-            <h1>Welcome {userData.name ? userData.name : "User"}!</h1>
-            <h1>My Meal Plan</h1>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", paddingTop: "20px", backgroundColor: "#ff7f50"}}>
+            {/* <h1>Welcome {userData.name ? userData.name : "User"}!</h1> */}
+            <h1 style={{ color: "white"}}>My Meal Plan</h1>
         </div>
         <main>
             <WeekCalendar drag={drag} setDrag={setDrag} weekPlan={weekPlan} setWeekPlan={setWeekplan}></WeekCalendar>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
-                <h1>Add To Your Plan!</h1>
+                <h1 style={{ color: "white"}}>Recommendations</h1>
+            </div>
+            <Recommendations setDrag={setDrag}></Recommendations>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "20px"}}>
+                <h1 style={{ color: "white"}}>Search For Meals</h1>
             </div>
             <Search setDrag={setDrag}></Search>
         </main>
