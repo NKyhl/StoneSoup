@@ -10,6 +10,7 @@ function UserPage({ userData, setUserData }){
             <Profile userData={userData} setUserData={setUserData} ></Profile>
             <Charts></Charts>
         </main>
+        <footer></footer>
         </>
     );
 }
