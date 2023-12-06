@@ -87,6 +87,7 @@ body {
 	display: flex;
     gap: 15px;
 	height: calc(var(--header-inner-height) - 30px);
+    width: 250px;
 }
 
 .header-navigation {
@@ -135,7 +136,7 @@ body {
 	left: 0;
 }
 
-@media (min-width: 800px) {
+@media (min-width: 500px) {
 	.header-navigation a {
 		display: inline-block;
 	}
