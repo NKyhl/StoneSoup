@@ -48,7 +48,7 @@ function Recommendations({ setDrag, weekPlan, userData }) {
         setDrag(false);
       }
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(2);
 
     const getRecs = async () => {
       setLoading(true);
@@ -78,7 +78,7 @@ function Recommendations({ setDrag, weekPlan, userData }) {
     console.log(res_json);
 
     setRecList(res_json["recipes"]);
-    setLoading(false);
+    setLoading(0);
     }
 
     if(loading){
@@ -86,7 +86,7 @@ function Recommendations({ setDrag, weekPlan, userData }) {
         <>
         <div className="recommendations-container">
             <div className='recommendations-inside-container' style={{display: "flex" , justifyContent: "center" , alignItems: "center"}}>
-                <h2>Loading...</h2>
+                <h2>{loading === 2 ? 'Refresh to Begin!' : 'Loading...'}</h2>
               </div>
         </div>
         <div style={{ display: "flex" , justifyContent: "center", height: "40px", alignItems: "center"}}>

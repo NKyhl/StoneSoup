@@ -18,7 +18,7 @@ function Search({setDrag}){
     const [maxProtein, setMaxProtein] = useState("");
 
     const [recipes, setRecipes] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(2); // 2 = ready to begin, 1 = loading, 0 = not loading
     const [currentPage, setCurrentPage] = useState(1);
 
     const recipesPerPage = 6;
@@ -33,7 +33,7 @@ function Search({setDrag}){
 
     const handleSearch = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setLoading(1);
         let data = {
             "search" : searchValue,
 			"ingredient" : ingValue,

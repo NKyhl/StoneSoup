@@ -2,8 +2,10 @@ function Recipes({ recipes, loading, setDrag }){
 
   console.log(recipes);
 
-    if(loading){
-        return <h2>Loading...</h2>
+    if(loading === 1){
+      return <h2>Loading...</h2>
+    } else if (loading === 2) {
+      return <h2>Search to Begin!</h2>
     }
 
     const handleDragStart = (e, recipe) => {
