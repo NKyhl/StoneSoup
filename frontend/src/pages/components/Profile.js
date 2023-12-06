@@ -18,7 +18,7 @@ const images = [require("../../icons/003-carrot.png"),
 
 function Profile({ userData, setUserData }){
     const [name, setName] = useState(userData.name);
-    const [email, setEmail] = useState(userData.cal_goal);
+    const [email, setEmail] = useState(userData.email);
     const [calories, setCalories] = useState(userData.cal_goal);
     const [carbs, setCarbs] = useState(userData.carb_goal);
     const [protein, setProtein] = useState(userData.protein_goal);
@@ -98,9 +98,9 @@ function Profile({ userData, setUserData }){
             </div>
             <div className="profile-attribute profile">
                 <label htmlFor="name">Username</label>
-                <input disabled={!edit} type="text" id="name" placeholder={userData.name ? userData.name : "Username"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setName(e.target.value)}></input>
+                <input disabled={!edit} type="text" id="name" placeholder={userData.name ? userData.name : "Username"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setName(e.target.value)}></input>
                 <label htmlFor="email">Email</label>
-                <input disabled={!edit} type="text" id="email" placeholder={userData.email ? userData.email : "Email"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setEmail(e.target.value)}></input>
+                <input disabled={!edit} type="text" id="email" placeholder={userData.email ? userData.email : "Email"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setEmail(e.target.value)}></input>
             </div>
             <div className="hr-text">
                 <h3>Daily Goals</h3>      
@@ -108,13 +108,13 @@ function Profile({ userData, setUserData }){
             </div>
             <div className="profile-attribute profile">
                 <label htmlFor="cals">Calories</label>
-                <input disabled={!edit} type="text" id="cals" placeholder={userData.cal_goal ? userData.cal_goal : "Calories"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setCalories(e.target.value)}></input>
-                <label htmlFor="carbs">Carbs</label>
-                <input disabled={!edit} type="text" id="carbs" placeholder={userData.carb_goal ? userData.carb_goal : "Carbs"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setCarbs(e.target.value)}></input>
-                <label htmlFor="proteins">Proteins</label>
-                <input disabled={!edit} type="text" id="proteins" placeholder={userData.protein_goal ? userData.protein_goal : "Protein"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setProtein(e.target.value)}></input>
-                <label htmlFor="fats">Fats</label>
-                <input disabled={!edit} type="text" id="fats" placeholder={userData.fat_goal ? userData.fat_goal : "Fats"} style={{ border: edit ? '1px solid black' : 'None' }} onChange={(e) => setFat(e.target.value)}></input>
+                <input disabled={!edit} type="text" id="cals" placeholder={userData.cal_goal ? userData.cal_goal : "Calories"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setCalories(e.target.value)}></input>
+                <label htmlFor="carbs">Carbs (g)</label>
+                <input disabled={!edit} type="text" id="carbs" placeholder={userData.carb_goal ? userData.carb_goal : "Carbs"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setCarbs(e.target.value)}></input>
+                <label htmlFor="proteins">Protein (g)</label>
+                <input disabled={!edit} type="text" id="proteins" placeholder={userData.protein_goal ? userData.protein_goal : "Protein"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setProtein(e.target.value)}></input>
+                <label htmlFor="fats">Fats (g)</label>
+                <input disabled={!edit} type="text" id="fats" placeholder={userData.fat_goal ? userData.fat_goal : "Fats"} style={{ border: edit ? '1px solid black' : 'None', color: '#e87b35' }} onChange={(e) => setFat(e.target.value)}></input>
             </div>
             <div className="profile-btns">
                 <IconButton style={ {display: edit ? 'block' : 'None'}} onClick={handleSave} aria-label="save">

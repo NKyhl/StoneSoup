@@ -2,7 +2,7 @@ import { Line } from 'react-chartjs-2';
 // eslint-disable-next-line no-unused-vars
 import Chart from 'chart.js/auto';
 
-function Charts() {
+function Charts({ userData, setUserData }) {
 
     const dataCal = {
         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -26,10 +26,10 @@ function Charts() {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [65, 59, 80, 81, 56, 55, 40],
+            data: [1401, 2100, 1900, 1600, 1800, 2500, 1700],
           },
           {
-            data: [75, 75, 75, 75, 75, 75, 75],
+            data: new Array(7).fill(userData.cal_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -59,10 +59,10 @@ function Charts() {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [65, 59, 80, 81, 56, 55, 40],
+            data: [200, 240, 230, 205, 300, 310, 280],
           },
           {
-            data: [75, 75, 75, 75, 75, 75, 75],
+            data: new Array(7).fill(userData.carb_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -92,10 +92,10 @@ function Charts() {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [65, 59, 80, 81, 56, 55, 40],
+            data: [50, 80, 70, 90, 85, 80, 85],
           },
           {
-            data: [75, 75, 75, 75, 75, 75, 75],
+            data: new Array(7).fill(userData.protein_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -125,10 +125,10 @@ function Charts() {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [65, 59, 80, 81, 56, 55, 40],
+            data: [40, 30, 60, 50, 45, 50, 40],
           },
           {
-            data: [75, 75, 75, 75, 75, 75, 75],
+            data: new Array(7).fill(userData.fat_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,

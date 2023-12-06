@@ -8,7 +8,7 @@ function UserPage({ userData, setUserData }){
         <Header userData={userData} ></Header>
         <main className="user-main">
             <Profile userData={userData} setUserData={setUserData} ></Profile>
-            <Charts></Charts>
+            <Charts userData={userData} setUserData={setUserData} ></Charts>
         </main>
         <footer></footer>
         </>

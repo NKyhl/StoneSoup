@@ -212,6 +212,14 @@ body {
     font-weight: 300;
 }
 
+.search-parent input::placeholder {
+    color: grey;
+}
+
+.profile input::placeholder {
+    color: #e87b35;
+}
+
 .profile-attribute {
     width: 100%;
     padding: 0 20px;
