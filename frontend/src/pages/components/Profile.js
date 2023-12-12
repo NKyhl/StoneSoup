@@ -32,8 +32,10 @@ function Profile({ userData, setUserData }){
     const handleSave = async () => { 
         // Update User Info in database
         let data = {
-            'username': name,
-            'email' : email,
+            'username': userData.name,
+            'email' : userData.email,
+            'new_username': name,
+            'new_email': email,
             'password': userData.password,
             'cal_goal': calories,
             'carb_goal': carbs,

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, make_response
-from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL, MySQLdb
 from flask_bcrypt import Bcrypt
 import random 
 
@@ -279,7 +279,11 @@ def update_user_goals():
     args.append(username)
 
     cursor = conn.cursor()
-    cursor.execute(query, tuple(args))
+    try:
+        cursor.execute(query, tuple(args))
+    except MySQLdb.OperationalError:
+        return {'message': 'Invalid user information'}, 400
+
     conn.commit()
 
     return {'message': 'User information updated'}, 200
