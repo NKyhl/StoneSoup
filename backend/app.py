@@ -1007,5 +1007,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5035, host='db8.cse.nd.edu')
 

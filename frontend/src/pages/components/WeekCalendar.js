@@ -229,10 +229,19 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
   const savePlan = async () => {
     const deepCopy = JSON.parse(JSON.stringify(weekPlan));
 
+    let protein = 0;
+    let carbs = 0;
+    let fat = 0;
+    let calories = 0;
+
     for(const day in weekPlan){
       for(const meal in weekPlan[day]){
         if(weekPlan[day][meal]){
           deepCopy[day][meal] = weekPlan[day][meal]["id"];
+          protein += weekPlan[day][meal]["protein"];
+          carbs += weekPlan[day][meal]["carbs"];
+          fat += weekPlan[day][meal]["fat"];
+          calories += weekPlan[day][meal]["calories"];
         }
         else{
           deepCopy[day][meal] = null;
@@ -243,10 +252,13 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
     const data = {
       user_id: userData["id"],
       start_date: startDay,
-      plan: deepCopy
+      plan: deepCopy,
+      calories: calories,
+      protein: protein,
+      fat: fat,
+      carbs: carbs
     }
 
-    console.log(deepCopy)
     const res = await fetch('/api/save/meal-plan', {
       method: "POST",
       headers: {

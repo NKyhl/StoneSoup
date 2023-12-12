@@ -1,11 +1,60 @@
 import { Line } from 'react-chartjs-2';
 // eslint-disable-next-line no-unused-vars
 import Chart from 'chart.js/auto';
+import { useEffect, useState } from 'react';
 
 function Charts({ userData, setUserData }) {
 
+  const [labelArray, setLabelArray] = useState([]);
+  const [calArray, setCalArray] = useState([]);
+  const [proteinArray, setProteinArray] = useState([]);
+  const [fatArray, setFatArray] = useState([]);
+  const [carbArray, setCarbArray] = useState([]);
+
+  useEffect(() => {
+      async function fetchData() {
+      const data = {
+        user_id: userData["id"],
+      }
+  
+      const res = await fetch('/api/get/user-history', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+  
+    if(!res.ok){
+        return;
+    }
+  
+    const res_json = await res.json();
+
+    const carb = res_json["weeks"].map(obj => obj["carbs"] / 7);
+    const protein = res_json["weeks"].map(obj => obj["protein"] / 7);
+    const fat = res_json["weeks"].map(obj => obj["fat"] / 7);
+    const cal = res_json["weeks"].map(obj => obj["calories"] / 7);
+    const label = res_json["weeks"].map(obj => obj["start_date"]);
+
+    console.log(label);
+    console.log(cal);
+  
+    console.log(res_json);
+    setLabelArray(label);
+    setCalArray(cal);
+    setProteinArray(protein);
+    setFatArray(fat);
+    setCarbArray(carb);
+  
+    }
+    
+    fetchData();
+
+  }, []);
+
     const dataCal = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: labelArray,
         datasets: [
           {
             label: 'Calories',
@@ -26,10 +75,10 @@ function Charts({ userData, setUserData }) {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [1401, 2100, 1900, 1600, 1800, 2500, 1700],
+            data: calArray,
           },
           {
-            data: new Array(7).fill(userData.cal_goal),
+            data: new Array(labelArray.length).fill(userData.cal_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -38,10 +87,10 @@ function Charts({ userData, setUserData }) {
       };
 
       const dataCarb = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: labelArray,
         datasets: [
           {
-            label: 'Calories',
+            label: 'carb',
             fill: false,
             lineTension: 0.1,
             backgroundColor: 'rgba(75,192,192,0.4)',
@@ -59,10 +108,10 @@ function Charts({ userData, setUserData }) {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [200, 240, 230, 205, 300, 310, 280],
+            data: carbArray,
           },
           {
-            data: new Array(7).fill(userData.carb_goal),
+            data: new Array(labelArray.length).fill(userData.carb_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -71,7 +120,7 @@ function Charts({ userData, setUserData }) {
       };
     
       const dataProtein = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: labelArray,
         datasets: [
           {
             label: 'Calories',
@@ -92,10 +141,10 @@ function Charts({ userData, setUserData }) {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [50, 80, 70, 90, 85, 80, 85],
+            data: proteinArray,
           },
           {
-            data: new Array(7).fill(userData.protein_goal),
+            data: new Array(labelArray.length).fill(userData.protein_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -104,7 +153,7 @@ function Charts({ userData, setUserData }) {
       };
 
       const dataFat = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels: labelArray,
         datasets: [
           {
             label: 'Calories',
@@ -125,10 +174,10 @@ function Charts({ userData, setUserData }) {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: [40, 30, 60, 50, 45, 50, 40],
+            data: fatArray,
           },
           {
-            data: new Array(7).fill(userData.fat_goal),
+            data: new Array(labelArray.length).fill(userData.fat_goal),
             borderColor: 'rgba(255,99,132,1)',
             backgroundColor: 'rgba(255,99,132,0.2)',
             pointRadius: 0,
@@ -143,7 +192,7 @@ function Charts({ userData, setUserData }) {
         },
         title: {
           display: true,
-          text: 'Calories',
+          text: 'Average Daily Calories',
           font: {
             size: 16,
           },
@@ -158,7 +207,7 @@ function Charts({ userData, setUserData }) {
         },
         title: {
           display: true,
-          text: 'Carb',
+          text: 'Average Daily Carbs',
           font: {
             size: 16,
           },
@@ -173,7 +222,7 @@ function Charts({ userData, setUserData }) {
         },
         title: {
           display: true,
-          text: 'Protein',
+          text: 'Average Daily Protein',
           font: {
             size: 16,
           },
@@ -188,7 +237,7 @@ function Charts({ userData, setUserData }) {
         },
         title: {
           display: true,
-          text: 'Fat',
+          text: 'Average Daily Fat',
           font: {
             size: 16,
           },
