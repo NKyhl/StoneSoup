@@ -706,6 +706,10 @@ def save_meal_plan():
     fri = plan.get("friday")
     sat = plan.get("saturday")
     sun = plan.get("sunday")
+    cal = plan.get("calories")
+    pro = plan.get("protein")
+    fat = plan.get("fat")
+    car = plan.get("carbs")
 
     meals = []
     for day in (mon, tue, wed, thu, fri, sat, sun):
@@ -729,15 +733,17 @@ def save_meal_plan():
             thu_breakfast = %s, thu_lunch = %s, thu_dinner = %s, thu_extra = %s,
             fri_breakfast = %s, fri_lunch = %s, fri_dinner = %s, fri_extra = %s,
             sat_breakfast = %s, sat_lunch = %s, sat_dinner = %s, sat_extra = %s,
-            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s
+            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s,
+            calories = %s, protein = %s, fat = %s, carbs = %s
         WHERE user_id = %s
           AND start_date = %s
         """
-        args = tuple(meals + [user_id, start_date])
+        args = tuple(meals + [cal, pro, fat, car, user_id, start_date])
 
     else:
         query = """
-        INSERT INTO SavedPlan (user_id, start_date, 
+        INSERT INTO SavedPlan (user_id, start_date,
+            calories, protein, fat, carbs, 
             mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
             tue_breakfast, tue_lunch, tue_dinner, tue_extra,
             wed_breakfast, wed_lunch, wed_dinner, wed_extra,
@@ -754,10 +760,11 @@ def save_meal_plan():
             %s, %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s,
+            %s, %s, %s, %s,
             %s, %s, %s, %s
         )
         """
-        args = tuple([user_id, start_date] + meals)
+        args = tuple([user_id, start_date, cal, pro, fat, car] + meals)
     
     cursor.execute(query, args)
 
@@ -898,6 +905,51 @@ def get_recipe(rid):
         'img_url':      recipe[11],
         'url':          recipe[12]
     } if recipe and len(recipe) == 13 else None
+
+@app.route("/api/get/user-history", methods=['POST'])
+def get_user_history():
+    '''Compile a user's history of nutritional performance.'''
+
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+    
+    user_id = request.json.get('user_id')
+    if not user_id:
+        return {'message': 'user_id not included'}, 400
+    
+    query = """
+    SELECT DATE_FORMAT(start_date, %s) start_date, calories, protein, fat, carbs
+    FROM SavedPlan
+    WHERE user_id = %s
+    """
+    args = ('%m-%d-%Y', user_id)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    weeks = cursor.fetchall()
+    cursor.close()
+
+    result = {
+        'weeks': []
+    }
+
+    for week in weeks:
+        result['weeks'].append(
+            {
+                'start_date': week[0],
+                'calories': week[1],
+                'protein': week[2],
+                'fat': week[3],
+                'carbs': week[4]
+            }
+        )
+
+    return result
 
 @app.route("/api/get/ingredients", methods=['POST'])
 def get_ingredients():
