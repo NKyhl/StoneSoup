@@ -299,11 +299,8 @@ def search_name():
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-
     ing = request.json.get("ingredient")
     if ing:
-
-
         ingwords = ing.split(',')
         inglet = []
 
@@ -337,14 +334,11 @@ def search_name():
             ingargs.append(ingwords[0])
         ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
-
         ingquery = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + ingquery + ")ing"
    
     name = request.json.get("search")
     if name.lower() == "stone":
         name = "%"
- 
-    name.replace('%', '\\%').replace('_', '\\_')
     
     words = name.split()
     mincal = request.json.get("minCal")
@@ -371,7 +365,6 @@ def search_name():
     maxpro = request.json.get("maxProtein")
     if maxpro:
         maxpro = int(maxpro)
-
 
     querylist = []
     wherelist = []
@@ -445,6 +438,10 @@ def search_name():
             fquery = ingquery
             args = ingargs
     a = tuple(args)
+
+    if not fquery:
+        return {'recipes': [], 'message': '0 recipes returned'}
+
     q = " LIMIT 100"
     fquery+= q
     print(fquery.format(*a)) 
@@ -471,8 +468,6 @@ def search_name():
         })
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
-
-        
 
 @app.route("/api/recommend", methods=['POST'])
 def usr_recommend():
