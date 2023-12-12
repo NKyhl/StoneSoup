@@ -225,6 +225,11 @@ def update_user_goals():
     new_username = request.json.get('new_username')
     new_email = request.json.get('new_email')
 
+    if new_username == username:
+        new_username = None
+    if new_email == email:
+        new_email = None
+
     icon_id = request.json.get('icon_id')
 
     if not username and not email:
