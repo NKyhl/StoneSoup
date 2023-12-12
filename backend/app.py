@@ -300,7 +300,7 @@ def search_name():
     if ing:
 
 
-        ingwords = ing.split()
+        ingwords = ing.split(',')
         inglet = []
 
         ingquerylist = []
@@ -334,7 +334,7 @@ def search_name():
         ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
 
-        ingquery = "SELECT name, category, url, img_url FROM (" + ingquery + ")ing"
+        ingquery = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + ingquery + ")ing"
    
     name = request.json.get("search")
     if name.lower() == "stone":
@@ -393,16 +393,16 @@ def search_name():
     elif len(words) == 1:
         word = name
         args.append(words[0])
-        query = "SELECT * FROM Recipe WHERE name like '%{}%' "
+        query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM Recipe WHERE name like '%{}%' "
     else: 
         query = ""
  
     if mincal or maxcal or mincarb or maxcarb or minfat or maxfat or minpro or maxpro:
         where = []
         if query:
-            query = "SELECT * FROM (" +query+ ")rec WHERE "
+            query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" +query+ ")rec WHERE "
         else:
-            query = "SELECT * FROM Recipe WHERE "
+            query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM Recipe WHERE "
         if mincal:
             where.append("calories > {}")
             args.append(mincal)
@@ -951,5 +951,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
 

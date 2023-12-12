@@ -60,7 +60,6 @@ function Search({setDrag}){
         }
 
         const res_json = await res.json();
-        console.log(res_json.recipes);
         setRecipes(res_json.recipes);
         setLoading(false);
     }

@@ -1,7 +1,5 @@
 function Recipes({ recipes, loading, setDrag }){
 
-  console.log(recipes);
-
     if(loading === 1){
       return <h2>Loading...</h2>
     } else if (loading === 2) {
