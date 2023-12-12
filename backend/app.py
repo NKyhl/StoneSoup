@@ -194,8 +194,8 @@ def api_signup():
     
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    query = "INSERT INTO User (name, email, password) VALUES (%s, %s, %s)"
-    args = (username, email, hashed_password)
+    query = "INSERT INTO User (name, email, password, cal_goal, protein_goal, fat_goal, carb_goal) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    args = (username, email, hashed_password, 1500, 50, 20, 50)
     
     cursor = conn.cursor()
     cursor.execute(query, args)
