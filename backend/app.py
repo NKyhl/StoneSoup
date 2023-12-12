@@ -926,9 +926,10 @@ def get_user_history():
         return {'message': 'user_id not included'}, 400
     
     query = """
-    SELECT DATE_FORMAT(start_date, %s) start_date, calories, protein, fat, carbs
+    SELECT DATE_FORMAT(start_date, %s) s_date, calories, protein, fat, carbs
     FROM SavedPlan
     WHERE user_id = %s
+    ORDER BY start_date
     """
     args = ('%m-%d-%Y', user_id)
 
@@ -943,6 +944,7 @@ def get_user_history():
     }
 
     for week in weeks:
+        print(week)
         result['weeks'].append(
             {
                 'start_date': week[0],
@@ -1007,5 +1009,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5035, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
 
