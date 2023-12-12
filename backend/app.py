@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, make_response
-from flask_mysqldb import MySQL
+from flask_mysqldb import MySQL, MySQLdb
 from flask_bcrypt import Bcrypt
 import random 
 
@@ -194,8 +194,8 @@ def api_signup():
     
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    query = "INSERT INTO User (name, email, password) VALUES (%s, %s, %s)"
-    args = (username, email, hashed_password)
+    query = "INSERT INTO User (name, email, password, cal_goal, protein_goal, fat_goal, carb_goal) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    args = (username, email, hashed_password, 1500, 50, 20, 50)
     
     cursor = conn.cursor()
     cursor.execute(query, args)
@@ -224,6 +224,11 @@ def update_user_goals():
 
     new_username = request.json.get('new_username')
     new_email = request.json.get('new_email')
+
+    if new_username == username:
+        new_username = None
+    if new_email == email:
+        new_email = None
 
     icon_id = request.json.get('icon_id')
 
@@ -279,7 +284,11 @@ def update_user_goals():
     args.append(username)
 
     cursor = conn.cursor()
-    cursor.execute(query, tuple(args))
+    try:
+        cursor.execute(query, tuple(args))
+    except MySQLdb.OperationalError:
+        return {'message': 'Invalid user information'}, 400
+
     conn.commit()
 
     return {'message': 'User information updated'}, 200
@@ -295,11 +304,8 @@ def search_name():
     if not conn:
         return {'message': 'The database is not available'}, 400
 
-
     ing = request.json.get("ingredient")
     if ing:
-
-
         ingwords = ing.split(',')
         inglet = []
 
@@ -333,14 +339,11 @@ def search_name():
             ingargs.append(ingwords[0])
         ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
-
         ingquery = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + ingquery + ")ing"
    
     name = request.json.get("search")
     if name.lower() == "stone":
         name = "%"
- 
-    name.replace('%', '\\%').replace('_', '\\_')
     
     words = name.split()
     mincal = request.json.get("minCal")
@@ -367,7 +370,6 @@ def search_name():
     maxpro = request.json.get("maxProtein")
     if maxpro:
         maxpro = int(maxpro)
-
 
     querylist = []
     wherelist = []
@@ -441,6 +443,10 @@ def search_name():
             fquery = ingquery
             args = ingargs
     a = tuple(args)
+
+    if not fquery:
+        return {'recipes': [], 'message': '0 recipes returned'}
+
     q = " LIMIT 100"
     fquery+= q
     print(fquery.format(*a)) 
@@ -467,8 +473,6 @@ def search_name():
         })
 
     return {'recipes': recipes, 'message': f'{len(recipes)} recipes returned'}
-
-        
 
 @app.route("/api/recommend", methods=['POST'])
 def usr_recommend():
@@ -659,6 +663,10 @@ def save_meal_plan():
     user_id = data.get("user_id")
     start_date = data.get("start_date")
     plan = data.get("plan")
+    cal = data.get("calories")
+    pro = data.get("protein")
+    fat = data.get("fat")
+    car = data.get("carbs")
 
     if not user_id:
         return {'message': 'user_id required'}, 400
@@ -729,15 +737,17 @@ def save_meal_plan():
             thu_breakfast = %s, thu_lunch = %s, thu_dinner = %s, thu_extra = %s,
             fri_breakfast = %s, fri_lunch = %s, fri_dinner = %s, fri_extra = %s,
             sat_breakfast = %s, sat_lunch = %s, sat_dinner = %s, sat_extra = %s,
-            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s
+            sun_breakfast = %s, sun_lunch = %s, sun_dinner = %s, sun_extra = %s,
+            calories = %s, protein = %s, fat = %s, carbs = %s
         WHERE user_id = %s
           AND start_date = %s
         """
-        args = tuple(meals + [user_id, start_date])
+        args = tuple(meals + [cal, pro, fat, car, user_id, start_date])
 
     else:
         query = """
-        INSERT INTO SavedPlan (user_id, start_date, 
+        INSERT INTO SavedPlan (user_id, start_date,
+            calories, protein, fat, carbs, 
             mon_breakfast, mon_lunch, mon_dinner, mon_extra, 
             tue_breakfast, tue_lunch, tue_dinner, tue_extra,
             wed_breakfast, wed_lunch, wed_dinner, wed_extra,
@@ -754,10 +764,11 @@ def save_meal_plan():
             %s, %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s,
+            %s, %s, %s, %s,
             %s, %s, %s, %s
         )
         """
-        args = tuple([user_id, start_date] + meals)
+        args = tuple([user_id, start_date, cal, pro, fat, car] + meals)
     
     cursor.execute(query, args)
 
@@ -899,6 +910,53 @@ def get_recipe(rid):
         'url':          recipe[12]
     } if recipe and len(recipe) == 13 else None
 
+@app.route("/api/get/user-history", methods=['POST'])
+def get_user_history():
+    '''Compile a user's history of nutritional performance.'''
+
+    if not request.json:
+        return {'message': 'application/json format required'}, 400
+
+    conn = mysql.connection
+    if not conn:
+        return {'message': 'The database is not available'}, 400
+    
+    user_id = request.json.get('user_id')
+    if not user_id:
+        return {'message': 'user_id not included'}, 400
+    
+    query = """
+    SELECT DATE_FORMAT(start_date, %s) s_date, calories, protein, fat, carbs
+    FROM SavedPlan
+    WHERE user_id = %s
+    ORDER BY start_date
+    """
+    args = ('%m-%d-%Y', user_id)
+
+    cursor = conn.cursor()
+    cursor.execute(query, args)
+
+    weeks = cursor.fetchall()
+    cursor.close()
+
+    result = {
+        'weeks': []
+    }
+
+    for week in weeks:
+        print(week)
+        result['weeks'].append(
+            {
+                'start_date': week[0],
+                'calories': week[1],
+                'protein': week[2],
+                'fat': week[3],
+                'carbs': week[4]
+            }
+        )
+
+    return result
+
 @app.route("/api/get/ingredients", methods=['POST'])
 def get_ingredients():
     '''Return ingredient information for a given recipe.'''
@@ -951,5 +1009,5 @@ def get_ingredients():
     return data
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5015, host='db8.cse.nd.edu')
+    app.run(debug=True, port=5036, host='db8.cse.nd.edu')
 
