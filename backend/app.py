@@ -658,6 +658,10 @@ def save_meal_plan():
     user_id = data.get("user_id")
     start_date = data.get("start_date")
     plan = data.get("plan")
+    cal = data.get("calories")
+    pro = data.get("protein")
+    fat = data.get("fat")
+    car = data.get("carbs")
 
     if not user_id:
         return {'message': 'user_id required'}, 400
@@ -705,10 +709,6 @@ def save_meal_plan():
     fri = plan.get("friday")
     sat = plan.get("saturday")
     sun = plan.get("sunday")
-    cal = plan.get("calories")
-    pro = plan.get("protein")
-    fat = plan.get("fat")
-    car = plan.get("carbs")
 
     meals = []
     for day in (mon, tue, wed, thu, fri, sat, sun):
