@@ -57,7 +57,6 @@ const TotalSummary = ( { weekPlan }) => {
             }
           
             const res_json = await res.json();
-            console.log(res_json);
             setIngredientList(res_json["ingredients"]);
           }
         

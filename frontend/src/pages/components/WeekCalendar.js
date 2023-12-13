@@ -34,36 +34,31 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
 
   useEffect( () => {
     async function fetchData() {
-    console.log(startDay);
-    console.log(userData);
-    const data = {
-      user_id: userData["id"],
-      start_date: startDay
+      const data = {
+        user_id: userData["id"],
+        start_date: startDay
+      }
+
+      const res = await fetch('/api/get/meal-plan', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+    if(!res.ok){
+        return;
     }
 
-    const res = await fetch('/api/get/meal-plan', {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-  });
+    const res_json = await res.json();
 
-  if(!res.ok){
-      return;
-  }
-
-  const res_json = await res.json();
-
-  console.log(res_json);
-
-  if(res_json["plan"] == null){
-    handleReset();
-  }
-  else{
-    setWeekPlan(res_json["plan"]);
-  }
-
+    if(res_json["plan"] == null){
+      handleReset();
+    }
+    else{
+      setWeekPlan(res_json["plan"]);
+    }
   }
 
   fetchData();
@@ -265,15 +260,13 @@ function WeekCalendar({ userData, drag, setDrag, weekPlan, setWeekPlan }) {
           "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
-  });
+    });
 
-  if(!res.ok){
-      return;
-  }
+    if(!res.ok){
+        return;
+    }
 
-  const res_json = await res.json();
-
-  console.log(res_json);
+    const res_json = await res.json();
   }
 
   return (

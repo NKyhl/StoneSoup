@@ -26,8 +26,6 @@ const WeekSummary = ({ weekPlan, userData }) => {
       let struct = [{},{},{},{},{},{},{}];
       let i = 0;
       for(const day in weekPlan){
-          console.log(day);
-          console.log(i);
           let protein = 0;
           let carbs = 0;
           let fat = 0;
@@ -45,7 +43,6 @@ const WeekSummary = ({ weekPlan, userData }) => {
           struct[dayIndex[day]] = { day: day.charAt(0).toUpperCase() + day.slice(1), protein: protein, carbs: carbs, fat: fat, calories: calories, total_time: total_time}
           i += 1;
         }
-        console.log(struct);
         setWeekData(struct);
 
   }, [weekPlan])

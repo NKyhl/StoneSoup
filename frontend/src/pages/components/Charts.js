@@ -12,7 +12,7 @@ function Charts({ userData, setUserData }) {
   const [carbArray, setCarbArray] = useState([]);
 
   useEffect(() => {
-      async function fetchData() {
+    async function fetchData() {
       const data = {
         user_id: userData["id"],
       }
@@ -23,30 +23,26 @@ function Charts({ userData, setUserData }) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
-    });
+      });
   
-    if(!res.ok){
-        return;
-    }
-  
-    const res_json = await res.json();
+      if(!res.ok){
+          return;
+      }
+    
+      const res_json = await res.json();
 
-    const carb = res_json["weeks"].map(obj => obj["carbs"] / 7);
-    const protein = res_json["weeks"].map(obj => obj["protein"] / 7);
-    const fat = res_json["weeks"].map(obj => obj["fat"] / 7);
-    const cal = res_json["weeks"].map(obj => obj["calories"] / 7);
-    const label = res_json["weeks"].map(obj => obj["start_date"]);
+      const carb = res_json["weeks"].map(obj => obj["carbs"] / 7);
+      const protein = res_json["weeks"].map(obj => obj["protein"] / 7);
+      const fat = res_json["weeks"].map(obj => obj["fat"] / 7);
+      const cal = res_json["weeks"].map(obj => obj["calories"] / 7);
+      const label = res_json["weeks"].map(obj => obj["start_date"]);
 
-    console.log(label);
-    console.log(cal);
-  
-    console.log(res_json);
-    setLabelArray(label);
-    setCalArray(cal);
-    setProteinArray(protein);
-    setFatArray(fat);
-    setCarbArray(carb);
-  
+      setLabelArray(label);
+      setCalArray(cal);
+      setProteinArray(protein);
+      setFatArray(fat);
+      setCarbArray(carb);
+    
     }
     
     fetchData();

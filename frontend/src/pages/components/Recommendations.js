@@ -77,7 +77,6 @@ function Recommendations({ setDrag, weekPlan, userData }) {
       }
     
       const res_json = await res.json();
-      console.log(res_json);
 
       setRecList(res_json["recipes"]);
       setLoading(0);

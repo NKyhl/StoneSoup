@@ -2,7 +2,6 @@ import { useState } from 'react';
 import './FlipCard.css';
 
 function FlipCard({ data }){
-console.log(data);
 
   const [isFlipped, setFlipped] = useState(false);
   const flipCard = () => {
