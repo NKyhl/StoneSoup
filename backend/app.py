@@ -306,7 +306,7 @@ def search_name():
 
     ing = request.json.get("ingredient")
     if ing:
-        ingwords = ing.split(',')
+        ingwords = list(map(lambda s: s.strip(), ing.split(',')))
         inglet = []
 
         ingquerylist = []
@@ -317,12 +317,12 @@ def search_name():
         if len(ingwords) > 1:
             for word in ingwords:
                 inglet.append(chr(ord('a') + x))
-                ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+                ingquery = ("SELECT id FROM Ingredient WHERE name LIKE %s")
                 ingquery = "("+ingquery+") ing"
-                ingquery = ("(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) {}")
+                ingquery = ("(SELECT recipe_id FROM "+ingquery+f", MadeWith m WHERE m.ingredient_id = ing.id) {chr(ord('a') + x)}")
                 ingquerylist.append(ingquery)
-                ingargs.append(word)
-                ingargs.append(inglet[x])
+                ingargs.append(f'%{word}%')
+                # ingargs.append(inglet[x])
                 x = x+1
             for i in range(1,x):
                 leta = chr(ord('a') + i-1)
@@ -333,10 +333,10 @@ def search_name():
             ingquery = "(SELECT DISTINCT a.recipe_id FROM " + ingquery + " WHERE " +ingwhere +") id"
 
         else:
-            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE '%{}%'")
+            ingquery = ("SELECT id FROM Ingredient WHERE name LIKE %s")
             ingquery = "("+ingquery+") ing"
             ingquery = "(SELECT recipe_id FROM "+ingquery+", MadeWith m WHERE m.ingredient_id = ing.id) id"
-            ingargs.append(ingwords[0])
+            ingargs.append(f'%{ingwords[0]}%')
         ingquery = "SELECT * FROM Recipe, "+ingquery+" WHERE Recipe.id = id.recipe_id"
     
         ingquery = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM (" + ingquery + ")ing"
@@ -380,9 +380,9 @@ def search_name():
     if len(words) > 1:
         for word in words:
             leta.append(chr(ord('a') + x))
-            querylist.append("(SELECT * FROM Recipe WHERE name LIKE '%{}%' ){}")
-            args.append(word)
-            args.append(leta[x])
+            querylist.append(f"(SELECT * FROM Recipe WHERE name LIKE %s ){chr(ord('a') + x)}")
+            args.append(f'%{word}%')
+            # args.append(leta[x])
             x+=1
         for i in range(1,x):
             leta = chr(ord('a') + i-1)
@@ -394,8 +394,8 @@ def search_name():
         query = query + where
     elif len(words) == 1:
         word = name
-        args.append(words[0])
-        query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM Recipe WHERE name like '%{}%' "
+        args.append(f'%{words[0]}%')
+        query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM Recipe WHERE name like %s "
     else: 
         query = ""
  
@@ -406,28 +406,28 @@ def search_name():
         else:
             query = "SELECT id, name, category, yield, calories, protein, fat, carbs, prep_time, cook_time, total_time, img_url, url FROM Recipe WHERE "
         if mincal:
-            where.append("calories > {}")
+            where.append("calories > %s")
             args.append(mincal)
         if maxcal:
-            where.append("calories < {}")
+            where.append("calories < %s")
             args.append(maxcal)
         if mincarb:
-            where.append("carbs > {}")
+            where.append("carbs > %s")
             args.append(mincarb)
         if maxcarb:
-            where.append("carbs < {}")
+            where.append("carbs < %s")
             args.append(maxcarb)
         if maxfat:
-            where.append("fat < {}")
+            where.append("fat < %s")
             args.append(maxfat)
         if minfat:
-            where.append("fat > {}")
+            where.append("fat > %s")
             args.append(minfat)
         if minpro:
-            where.append("protein > {}")
+            where.append("protein > %s")
             args.append(minpro)
         if maxpro:
-            where.append("protein < {}")
+            where.append("protein < %s")
             args.append(maxpro)
         W = " AND ".join(where)
         query = query + W        
@@ -449,9 +449,10 @@ def search_name():
 
     q = " LIMIT 100"
     fquery+= q
-    print(fquery.format(*a)) 
+    # print(fquery.format(*a))
+    # print(fquery, a) 
     curs = conn.cursor()
-    curs.execute(fquery.format(*a))
+    curs.execute(fquery, a)
     recs = curs.fetchall()
     curs.close()
     recipes = []
