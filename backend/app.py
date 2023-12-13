@@ -137,7 +137,7 @@ def validate_user(username='', email='', password=''):
     response = {'valid': bcrypt.check_password_hash(hashed_password, password)}
 
     if not response['valid']:
-        return response, 400
+        return {'message': 'Invalid user credentials'}, 400
 
     # If valid, return user info as well
     query = "SELECT id, name, email, cal_goal, protein_goal, fat_goal, carb_goal, icon_id FROM User"
