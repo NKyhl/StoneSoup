@@ -1,4 +1,5 @@
-# Stone Soup
+<h1><img align="center" src="assets/readme/icon.png" height="32"> Stone Soup</h1>
+
 > Final Project for Database Concepts - CSE 30246
 
 **Stone Soup** is an intelligent meal planning application that lets you search a database of 14,000 recipes, create weekly meal plans, track your macros, and receive personalized recipe recommendations based on ingredients already on your shopping list.
@@ -41,20 +42,24 @@ python3 backend/app.py
 ```
 
 ## Database Schema
-![Database schema](/assets/readme/schema.png)
+<img src="assets/readme/schema.png" height="500">
 
 ## Gallery
 
-![A screenshot of the Search section](/assets/readme/search.png)
+<img src="assets/readme/search.png" alt="A screenshot of the Search section" height="500">
+
 **Figure 1.** Search for recipes and filter by macros.
 
-![A screenshot of the Calendar section](/assets/readme/calendar.png)
+<img src="assets/readme/calendar.png" alt="A screenshot of the Calendar section" height="500">
+
 **Figure 2.** Drag and drop recipes to the Calendar section to meal plan by week.
 
-![A screenshot of the Recommendations section](/assets/readme/recommendations.png)
+<img src="assets/readme/recommendations.png" alt="A screenshot of the Recommendations section" height="500">
+
 **Figure 3.** Receive personalized recommendations based on your current grocery list.
 
-![A screenshot of the Macros section](/assets/readme/macros.png)
+<img src="assets/readme/macros.png" alt="A screenshot of the Macros section" height="500">
+
 **Figure 4.** On the profile page, see your macro history and set goals.
 
 ## Group Members
